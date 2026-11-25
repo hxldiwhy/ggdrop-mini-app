@@ -2,13 +2,27 @@
 
 export const app = window.WiftgramApp || { ready() {}, expand() {}, haptic() {} };
 
+/** Идентификатор этого клиента: ссылку из бота нельзя открыть под другим аккаунтом. */
+export function deviceId() {
+  try {
+    let id = localStorage.getItem('ggdrop_device');
+    if (!id) {
+      id = (crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`).slice(0, 80);
+      localStorage.setItem('ggdrop_device', id);
+    }
+    return id;
+  } catch {
+    return 'unknown-device';
+  }
+}
+
 export const state = {
   token: localStorage.getItem('ggdrop_token') || '',
   user: null,
   settings: {
     currency: 'WFT', minBet: 10, maxBet: 25000, limits: {}, dailyBonus: 0,
-    maxBalance: 150000, storageFee: { enabled: true, threshold: 100000, percentPerDay: 0.5 },
-    minWithdraw: 1000, maxWithdraw: 150000,
+    maxBalance: 0, storageFee: { enabled: false, threshold: 100000, percentPerDay: 0 },
+    minWithdraw: 1000, maxWithdraw: 1000000,
   },
   screen: 'home',
   bootstrapQuery: new URLSearchParams(location.search),
@@ -16,7 +30,7 @@ export const state = {
 };
 
 const hooks = {};
-const GAME_SCREENS = new Set(['crash', 'roulette', 'dice', 'blackjack', 'wheel', 'plinko', 'coinflip']);
+const GAME_SCREENS = new Set(['crash', 'roulette', 'blackjack', 'wheel', 'plinko', 'coinflip']);
 
 export function onScreen(name, handlers) {
   hooks[name] = handlers;
