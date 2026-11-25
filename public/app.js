@@ -29,7 +29,7 @@ function showFatal(title, text) {
   document.getElementById('app').innerHTML = `
     <div class="error-screen">
       <div>
-        <div class="emoji">рџЋ°</div>
+        <div class="emoji">🎰</div>
         <h2>${title}</h2>
         <p>${text}</p>
       </div>
@@ -68,17 +68,17 @@ async function bootstrap() {
   }
 
   if (!ok) {
-    const diag = `РїРѕРґРїРёСЃСЊ: ${initData ? 'РµСЃС‚СЊ' : 'РЅРµС‚'} В· id РєР»РёРµРЅС‚Р°: ${unsafe?.user?.id || 'вЂ”'} В· РїСЂРёС‡РёРЅР°: ${sessionError?.code || 'вЂ”'}`;
+    const diag = `подпись: ${initData ? 'есть' : 'нет'} · id клиента: ${unsafe?.user?.id || '—'} · причина: ${sessionError?.code || '—'}`;
     showFatal(
-      'РќРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґС‚РІРµСЂРґРёС‚СЊ Р°РєРєР°СѓРЅС‚',
-      'РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ СЃРёРЅРµР№ РєРЅРѕРїРєРѕР№ РІ С‡Р°С‚Рµ СЃ Р±РѕС‚РѕРј. Р•СЃР»Рё СѓР¶Рµ РѕС‚РєСЂС‹С‚Рѕ вЂ” РІРµСЂРЅРёСЃСЊ РІ С‡Р°С‚ Рё РЅР°Р¶РјРё РєРЅРѕРїРєСѓ Р·Р°РЅРѕРІРѕ.' +
+      'Не удалось подтвердить аккаунт',
+      'Открой казино синей кнопкой в чате с ботом. Если уже открыто — вернись в чат и нажми кнопку заново.' +
         `<br/><span class="small muted">${diag}</span>`
     );
     return;
   }
 
   if (state.user?.banned) {
-    showFatal('РђРєРєР°СѓРЅС‚ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ', 'РҐРѕР·СЏРёРЅ РєР°Р·РёРЅРѕ РѕРіСЂР°РЅРёС‡РёР» РґРѕСЃС‚СѓРї. Р•СЃР»Рё СЌС‚Рѕ РѕС€РёР±РєР° вЂ” РЅР°РїРёС€Рё РµРјСѓ РІ С‡Р°С‚ Р±РѕС‚Р°.');
+    showFatal('Аккаунт заблокирован', 'Хозяин казино ограничил доступ. Если это ошибка — напиши ему в чат бота.');
     return;
   }
 
@@ -105,7 +105,7 @@ async function bootstrap() {
   if (state.bootstrapQuery.get('view') === 'topup') setTimeout(() => depositModal(), 350);
 }
 
-/* в”Ђв”Ђв”Ђ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РѕР±СЂР°Р±РѕС‚С‡РёРєРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─── глобальные обработчики ─────────────────────────────────────────────── */
 function wireRouter() {
   document.addEventListener('click', (e) => {
     const target = e.target.closest('[data-go]');
@@ -193,10 +193,10 @@ async function refreshMe() {
   } catch {}
 }
 
-/* в”Ђв”Ђв”Ђ РіР»Р°РІРЅР°СЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─── главная ────────────────────────────────────────────────────────────── */
 const RESUME_NAMES = {
-  crash: 'РљСЂР°С€', roulette: 'Р СѓР»РµС‚РєР°', dice: 'РљРѕСЃС‚Рё', blackjack: 'Р‘Р»СЌРєРґР¶РµРє',
-  wheel: 'РљРѕР»РµСЃРѕ', plinko: 'РџР»РёРЅРєРѕ', coinflip: 'РњРѕРЅРµС‚РєР°',
+  crash: 'Краш', roulette: 'Рулетка', dice: 'Кости', blackjack: 'Блэкджек',
+  wheel: 'Колесо', plinko: 'Плинко', coinflip: 'Монетка',
 };
 
 function renderHome() {
@@ -204,7 +204,7 @@ function renderHome() {
   const e = $('rouletteEdge');
   if (e && edge) e.textContent = `RTP ${(100 - edge * 100).toFixed(1)}%`;
   const lim = $('homeLimits');
-  if (lim) lim.textContent = `${state.settings.minBet}вЂ“${state.settings.maxBet}`;
+  if (lim) lim.textContent = `${state.settings.minBet}–${state.settings.maxBet}`;
 
   const card = $('resumeGame');
   const last = lastGame();
@@ -218,10 +218,10 @@ function renderHome() {
   }
 }
 
-/* в”Ђв”Ђв”Ђ Р»РѕР±Р±Рё: live-Р»РµРЅС‚Р° Рё РїР»РёС‚РєРё в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─── лобби: live-лента и плитки ──────────────────────────────────────────── */
 const FEED_NAMES = {
-  crash: 'РљСЂР°С€', dice: 'РљРѕСЃС‚Рё', roulette: 'Р СѓР»РµС‚РєР°',
-  blackjack: 'Р‘Р»СЌРєРґР¶РµРє', wheel: 'РљРѕР»РµСЃРѕ', plinko: 'РџР»РёРЅРєРѕ', coinflip: 'РњРѕРЅРµС‚РєР°', lucky: 'Lucky Wheel',
+  crash: 'Краш', dice: 'Кости', roulette: 'Рулетка',
+  blackjack: 'Блэкджек', wheel: 'Колесо', plinko: 'Плинко', coinflip: 'Монетка', lucky: 'Lucky Wheel',
 };
 const maskName = (n) => {
   const bare = String(n || 'player').replace(/^@/, '').trim() || 'player';
@@ -234,7 +234,7 @@ function initLobby() {
   if (lobbyStarted) return;
   lobbyStarted = true;
 
-  // Live-Р»РµРЅС‚Р° РІС‹РёРіСЂС‹С€РµР№ (СЂРµР°Р»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ /api/feed)
+  // Live-лента выигрышей (реальные данные /api/feed)
   const feedTrack = $('liveFeedTrack');
   let feedSignature = '';
   const loadFeed = async () => {
@@ -257,20 +257,20 @@ function initLobby() {
       if (signature === feedSignature) return;
       feedSignature = signature;
       const html = items
-        .map((x) => `<span class="live-feed__item"><b>${escapeHtml(maskName(x.name))}</b> РІС‹РёРіСЂР°Р» <i>+${fmt(x.profit)} в­ђ</i> <em>${escapeHtml(FEED_NAMES[x.game] || x.game)}</em></span>`)
+        .map((x) => `<span class="live-feed__item"><b>${escapeHtml(maskName(x.name))}</b> выиграл <i>+${fmt(x.profit)} ⭐</i> <em>${escapeHtml(FEED_NAMES[x.game] || x.game)}</em></span>`)
         .join('');
-      feedTrack.innerHTML = html + html; // РґСѓР±Р»СЊ РґР»СЏ Р±РµСЃС€РѕРІРЅРѕРіРѕ marquee
+      feedTrack.innerHTML = html + html; // дубль для бесшовного marquee
       feedTrack.style.setProperty('--feed-duration', `${Math.max(24, items.length * 4.5)}s`);
     } catch (e) {
       if (e?.code !== 'NETWORK') console.warn('[feed]', e?.message || e);
     }
   };
   loadFeed();
-  // РџРµСЂРІС‹Р№ РїРѕРІС‚РѕСЂ Р±С‹СЃС‚СЂС‹Р№: СЃРµСЃСЃРёСЏ РјРѕРіР»Р° РµС‰С‘ РЅРµ СѓСЃРїРµС‚СЊ РІС‹РґР°С‚СЊ С‚РѕРєРµРЅ.
+  // Первый повтор быстрый: сессия могла ещё не успеть выдать токен.
   setTimeout(loadFeed, 2500);
   setInterval(loadFeed, 12000);
 
-  // В«Р’ РёРіСЂРµВ» вЂ” Р¶РёРІС‹Рµ РїСЃРµРІРґРѕ-СЃС‡С‘С‚С‡РёРєРё (РґР¶РёС‚С‚РµСЂ РІРѕРєСЂСѓРі Р±Р°Р·С‹)
+  // «В игре» — живые псевдо-счётчики (джиттер вокруг базы)
   const players = [...document.querySelectorAll('.station__players')];
   players.forEach((el) => { el.dataset.base = el.dataset.players || '100'; });
   setInterval(() => {
@@ -281,7 +281,7 @@ function initLobby() {
     });
   }, 6000);
 
-  // 3D-tilt РЅР° РёРіСЂРѕРІС‹С… РїР»РёС‚РєР°С… (pointer-only, Р±РµР· overhead РЅР° touch)
+  // 3D-tilt на игровых плитках (pointer-only, без overhead на touch)
   document.querySelectorAll('.station').forEach((tile) => {
     tile.addEventListener('pointermove', (e) => {
       if (e.pointerType === 'touch') return;
@@ -300,15 +300,15 @@ function initLobby() {
   });
 }
 
-/* в”Ђв”Ђв”Ђ РїСЂРѕС„РёР»СЊ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─── профиль ────────────────────────────────────────────────────────────── */
 let historyCache = [];
 
 const VIP_LEVELS = [
-  { need: 0, name: 'РќРѕРІРёС‡РѕРє' },
-  { need: 10000, name: 'РРіСЂРѕРє' },
-  { need: 50000, name: 'РџСЂРѕС„Рё' },
-  { need: 200000, name: 'Р­Р»РёС‚Р°' },
-  { need: 1000000, name: 'Р›РµРіРµРЅРґР°' },
+  { need: 0, name: 'Новичок' },
+  { need: 10000, name: 'Игрок' },
+  { need: 50000, name: 'Профи' },
+  { need: 200000, name: 'Элита' },
+  { need: 1000000, name: 'Легенда' },
 ];
 
 function renderVip(u) {
@@ -320,16 +320,16 @@ function renderVip(u) {
   const cur = VIP_LEVELS[i];
   const next = VIP_LEVELS[i + 1];
   $('vipLevel').textContent = `LV ${level}`;
-  $('vipLabel').textContent = `РЈСЂРѕРІРµРЅСЊ ${level} В· ${cur.name} В· РѕР±РѕСЂРѕС‚ ${money(wagered)}`;
+  $('vipLabel').textContent = `Уровень ${level} · ${cur.name} · оборот ${money(wagered)}`;
   const bar = $('vipProgress');
   if (next) {
     const from = cur.need;
     const pct = Math.max(0, Math.min(100, ((wagered - from) / (next.need - from)) * 100));
     if (bar) bar.style.width = `${pct}%`;
-    $('vipNext').textContent = `Р”Рѕ СѓСЂРѕРІРЅСЏ ${level + 1} В«${next.name}В» РѕСЃС‚Р°Р»РѕСЃСЊ ${money(Math.max(0, next.need - wagered))} в­ђ РѕР±РѕСЂРѕС‚Р°`;
+    $('vipNext').textContent = `До уровня ${level + 1} «${next.name}» осталось ${money(Math.max(0, next.need - wagered))} ⭐ оборота`;
   } else {
     if (bar) bar.style.width = '100%';
-    $('vipNext').textContent = 'РњР°РєСЃРёРјР°Р»СЊРЅС‹Р№ СѓСЂРѕРІРµРЅСЊ РѕС‚РєСЂС‹С‚';
+    $('vipNext').textContent = 'Максимальный уровень открыт';
   }
 }
 
@@ -350,7 +350,7 @@ function renderProfile() {
   $('statGames').textContent = fmt(u.games || 0);
   $('statWinrate').textContent = u.games ? `${Math.round(((u.wins || 0) / u.games) * 100)}%` : '0%';
 
-  // РќРѕРІР°СЏ РєР°СЂС‚РѕС‡РєР° РїСЂРѕС„РёР»СЏ (СЃС‚РёР»СЊ РїСЂРёСЃР»Р°РЅРЅС‹С… СЂРµС„РµСЂРµРЅСЃРѕРІ)
+  // Новая карточка профиля (стиль присланных референсов)
   if ($('heroBalanceValue')) $('heroBalanceValue').textContent = fmt(u.balance);
   if ($('friendsCount')) $('friendsCount').textContent = fmt(u.refCount || 0);
   renderVip(u);
@@ -359,13 +359,13 @@ function renderProfile() {
   const fee = state.settings.storageFee || {};
   $('statVault').textContent = money(u.vault || 0);
   $('statFeePaid').textContent = money(u.feePaid || 0);
-  $('walletHint').textContent = `РџРѕС‚РѕР»РѕРє Р±Р°Р»Р°РЅСЃР° ${money(cap)} В· РёР·Р»РёС€РµРє СѓС…РѕРґРёС‚ РІ Р±Р°РЅРє`;
-  if ($('heroVaultLine')) $('heroVaultLine').textContent = `Р’ Р±Р°РЅРєРµ: ${money(u.vault || 0)} В· РїРѕС‚РѕР»РѕРє ${money(cap)}`;
+  $('walletHint').textContent = `Потолок баланса ${money(cap)} · излишек уходит в банк`;
+  if ($('heroVaultLine')) $('heroVaultLine').textContent = `В банке: ${money(u.vault || 0)} · потолок ${money(cap)}`;
   window.__renderNfts?.();
-  $('statFee').textContent = fee.enabled ? `${fee.percentPerDay || 0}%/СЃСѓС‚РєРё СЃРІРµСЂС… ${fmt(fee.threshold || 0)}` : 'РІС‹РєР»СЋС‡РµРЅР°';
+  $('statFee').textContent = fee.enabled ? `${fee.percentPerDay || 0}%/сутки сверх ${fmt(fee.threshold || 0)}` : 'выключена';
   $('feeHint').textContent = fee.enabled
-    ? `РљРѕРјРёСЃСЃРёСЏ РЅР°С‡РёСЃР»СЏРµС‚СЃСЏ СЂР°Р· РІ СЃСѓС‚РєРё С‚РѕР»СЊРєРѕ РЅР° СЃСѓРјРјСѓ СЃРІРµСЂС… ${fmt(fee.threshold || 0)} в­ђ Рё РѕС‚РѕР±СЂР°Р¶Р°РµС‚СЃСЏ РІ РёСЃС‚РѕСЂРёРё.`
-    : 'РљРѕРјРёСЃСЃРёСЏ Р·Р° С…СЂР°РЅРµРЅРёРµ РѕС‚РєР»СЋС‡РµРЅР° С…РѕР·СЏРёРЅРѕРј.';
+    ? `Комиссия начисляется раз в сутки только на сумму сверх ${fmt(fee.threshold || 0)} ⭐ и отображается в истории.`
+    : 'Комиссия за хранение отключена хозяином.';
 
   const bar = $('walletBar');
   if (bar) {
@@ -377,17 +377,17 @@ function renderProfile() {
   if (dailyBtn) {
     if (u.dailyReady) {
       dailyBtn.disabled = false;
-      dailyBtn.textContent = 'Р—Р°Р±СЂР°С‚СЊ';
-      $('dailyHint').textContent = `+${money(state.settings.dailyBonus)} Р±РµСЃРїР»Р°С‚РЅРѕ`;
+      dailyBtn.textContent = 'Забрать';
+      $('dailyHint').textContent = `+${money(state.settings.dailyBonus)} бесплатно`;
     } else {
       dailyBtn.disabled = true;
       const h = Math.ceil((u.dailyIn || 0) / 3600000);
-      dailyBtn.textContent = h >= 1 ? `С‡РµСЂРµР· ${h} С‡` : 'СЃРєРѕСЂРѕ';
-      $('dailyHint').textContent = 'Р‘РѕРЅСѓСЃ СѓР¶Рµ РїРѕР»СѓС‡РµРЅ, РІРѕР·РІСЂР°С‰Р°Р№СЃСЏ РїРѕР·Р¶Рµ';
+      dailyBtn.textContent = h >= 1 ? `через ${h} ч` : 'скоро';
+      $('dailyHint').textContent = 'Бонус уже получен, возвращайся позже';
     }
   }
   const topupHint = $('topupHint');
-  if (topupHint) topupHint.textContent = `Р§РµСЂРµР· @${state.settings.cashierUsername || 'crypt'} В· Р·Р°СЏРІРєР°`;
+  if (topupHint) topupHint.textContent = `Через @${state.settings.cashierUsername || 'crypt'} · заявка`;
   renderHistory();
   renderDeposits();
 }
@@ -402,13 +402,13 @@ async function renderHistory() {
     return;
   }
   const names = {
-    roulette: 'рџЋЎ Р СѓР»РµС‚РєР°', crash: 'рџљЂ РљСЂР°С€', dice: 'рџЋІ РљРѕСЃС‚Рё',
-    blackjack: 'рџѓЏ Р‘Р»СЌРєРґР¶РµРє', coinflip: 'в—ђ РњРѕРЅРµС‚РєР°', bonus: 'рџЋЃ Р‘РѕРЅСѓСЃ', transfer: 'рџ’ё РџРµСЂРµРІРѕРґ', admin: 'рџ‘‘ РђРґРјРёРЅ',
-    fee: 'рџЏ¦ РљРѕРјРёСЃСЃРёСЏ', limit: 'рџ§± Р›РёРјРёС‚', withdraw: 'рџ’ё Р’С‹РІРѕРґ', deposit: 'в­ђ РџРѕРїРѕР»РЅРµРЅРёРµ', wheel: 'рџЌЂ РљРѕР»РµСЃРѕ', plinko: 'рџ”» РџР»РёРЅРєРѕ', lucky: 'рџЋЎ Lucky Wheel',
+    roulette: '🎡 Рулетка', crash: '🚀 Краш', dice: '🎲 Кости',
+    blackjack: '🃏 Блэкджек', coinflip: '◐ Монетка', bonus: '🎁 Бонус', transfer: '💸 Перевод', admin: '👑 Админ',
+    fee: '🏦 Комиссия', limit: '🧱 Лимит', withdraw: '💸 Вывод', deposit: '⭐ Пополнение', wheel: '🍀 Колесо', plinko: '🔻 Плинко', lucky: '🎡 Lucky Wheel',
   };
   $('historyCount').textContent = historyCache.length ? `${historyCache.length}` : '';
   if (!historyCache.length) {
-    box.innerHTML = '<div class="small muted">РџРѕРєР° РїСѓСЃС‚Рѕ</div>';
+    box.innerHTML = '<div class="small muted">Пока пусто</div>';
     return;
   }
   box.innerHTML = historyCache
@@ -426,11 +426,11 @@ async function renderHistory() {
     .join('');
 }
 
-/* в”Ђв”Ђв”Ђ РґРµР№СЃС‚РІРёСЏ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─── действия ───────────────────────────────────────────────────────────── */
 async function daily() {
   try {
     const r = await api('/daily', { method: 'POST' });
-    toast(`Р‘РѕРЅСѓСЃ +${money(r.amount)}`, 'ok');
+    toast(`Бонус +${money(r.amount)}`, 'ok');
     app.haptic('success');
     updateUser(r.user);
     renderProfile();
@@ -440,21 +440,21 @@ async function daily() {
 function promoModal() {
   const wrap = document.createElement('div');
   wrap.innerHTML = `
-    <label class="field">РџСЂРѕРјРѕРєРѕРґ</label>
-    <input type="text" id="modalPromoInput" placeholder="РќРђРџР РРњР•Р : WELCOME" style="text-transform:uppercase" />
-    <div class="small muted mt">РљРѕРґС‹ СЂР°Р·РґР°С‘С‚ С…РѕР·СЏРёРЅ РєР°Р·РёРЅРѕ РІ С‡Р°С‚Рµ Р±РѕС‚Р°.</div>`;
+    <label class="field">Промокод</label>
+    <input type="text" id="modalPromoInput" placeholder="НАПРИМЕР: WELCOME" style="text-transform:uppercase" />
+    <div class="small muted mt">Коды раздаёт хозяин казино в чате бота.</div>`;
   const close = modal({
-    title: 'рџЋџ РђРєС‚РёРІРёСЂРѕРІР°С‚СЊ РїСЂРѕРјРѕРєРѕРґ',
+    title: '🎟 Активировать промокод',
     content: wrap,
     actions: [
       {
-        text: 'РђРєС‚РёРІРёСЂРѕРІР°С‚СЊ',
+        text: 'Активировать',
         async onClick() {
           const code = wrap.querySelector('#modalPromoInput').value.trim();
-          if (!code) { toast('Р’РІРµРґРё РєРѕРґ', 'err'); return false; }
+          if (!code) { toast('Введи код', 'err'); return false; }
           try {
             const r = await api('/promo', { method: 'POST', body: { code } });
-            toast(`РџСЂРѕРјРѕРєРѕРґ РїСЂРёРЅСЏС‚: +${money(r.amount)}`, 'ok');
+            toast(`Промокод принят: +${money(r.amount)}`, 'ok');
             updateUser(r.user);
             renderProfile();
           } catch { return false; }
@@ -470,17 +470,17 @@ function promoModal() {
 async function applyPromo() {
   const input = $('promoInput');
   const code = input?.value.trim();
-  if (!code) return toast('Р’РІРµРґРё РєРѕРґ', 'err');
+  if (!code) return toast('Введи код', 'err');
   try {
     const r = await api('/promo', { method: 'POST', body: { code } });
-    toast(`РџСЂРѕРјРѕРєРѕРґ РїСЂРёРЅСЏС‚: +${money(r.amount)}`, 'ok');
+    toast(`Промокод принят: +${money(r.amount)}`, 'ok');
     updateUser(r.user);
     input.value = '';
     renderProfile();
   } catch {}
 }
 
-/* в”Ђв”Ђв”Ђ РїРѕРїРѕР»РЅРµРЅРёРµ Р·РІС‘Р·Рґ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─── пополнение звёзд ───────────────────────────────────────────────────── */
 let depositsCache = [];
 
 function depositModal() {
@@ -493,14 +493,14 @@ function depositModal() {
   const wrap = document.createElement('div');
   wrap.innerHTML = `
     <div class="row row--between mb">
-      <span class="small muted">РўРµРєСѓС‰РёР№ Р±Р°Р»Р°РЅСЃ</span>
+      <span class="small muted">Текущий баланс</span>
       <b class="gold">${money(state.user?.balance || 0)}</b>
     </div>
-    <div class="cap-note">РџРѕС‚РѕР»РѕРє Р±Р°Р»Р°РЅСЃР° ${money(state.settings.maxBalance || 150000)}. Р’СЃС‘ СЃРІРµСЂС…Сѓ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё СѓС…РѕРґРёС‚ РІ Р±Р°РЅРє вЂ” СЌС‚Рѕ РІРёРґРЅРѕ РІ РїСЂРѕС„РёР»Рµ.</div>
-    <label class="field">РЎСѓРјРјР° РїРѕРїРѕР»РЅРµРЅРёСЏ</label>
+    <div class="cap-note">Потолок баланса ${money(state.settings.maxBalance || 150000)}. Всё сверху автоматически уходит в банк — это видно в профиле.</div>
+    <label class="field">Сумма пополнения</label>
     <div class="bet-input">
       <input type="number" id="depAmount" value="${def}" min="${min}" inputmode="numeric" />
-      <span class="hint">в­ђ</span>
+      <span class="hint">⭐</span>
     </div>
     <div class="amount-grid" id="depPresets">
       ${presets
@@ -508,29 +508,29 @@ function depositModal() {
         .join('')}
     </div>
     <div class="deposit-steps">
-      <div class="deposit-step"><span class="num">1</span><span>РќР°РїРёС€Рё <b>@${escapeHtml(cashier)}</b> Рё РѕС‚РїСЂР°РІСЊ РѕС„С„РµСЂ/РїРѕРґР°СЂРѕРє СЃРѕ Р·РІС‘Р·РґР°РјРё РЅР° РЅСѓР¶РЅСѓСЋ СЃСѓРјРјСѓ.</span></div>
-      <div class="deposit-step"><span class="num">2</span><span>РЎРѕР·РґР°Р№ Р·Р°СЏРІРєСѓ вЂ” РїРѕР»СѓС‡РёС€СЊ РЅРѕРјРµСЂ, СѓРєР°Р¶Рё РµРіРѕ РІ СЃРѕРѕР±С‰РµРЅРёРё С…РѕР·СЏРёРЅСѓ.</span></div>
-      <div class="deposit-step"><span class="num">3</span><span>РҐРѕР·СЏРёРЅ РїРѕРґС‚РІРµСЂРґРёС‚ Р·Р°СЏРІРєСѓ вЂ” Р·РІС‘Р·РґС‹ СЃСЂР°Р·Сѓ РїСЂРёРґСѓС‚ РЅР° Р±Р°Р»Р°РЅСЃ.</span></div>
+      <div class="deposit-step"><span class="num">1</span><span>Напиши <b>@${escapeHtml(cashier)}</b> и отправь оффер/подарок со звёздами на нужную сумму.</span></div>
+      <div class="deposit-step"><span class="num">2</span><span>Создай заявку — получишь номер, укажи его в сообщении хозяину.</span></div>
+      <div class="deposit-step"><span class="num">3</span><span>Хозяин подтвердит заявку — звёзды сразу придут на баланс.</span></div>
     </div>
     <div class="cashier-card">
       <div class="ava">@</div>
-      <div style="flex:1"><div class="who">@${escapeHtml(cashier)}</div><div class="sub">РєР°СЃСЃРёСЂ В· С…РѕР·СЏРёРЅ РєР°Р·РёРЅРѕ</div></div>
-      <button class="btn btn--sm btn--ghost" id="depCopy">РљРѕРїРёСЂРѕРІР°С‚СЊ</button>
+      <div style="flex:1"><div class="who">@${escapeHtml(cashier)}</div><div class="sub">кассир · хозяин казино</div></div>
+      <button class="btn btn--sm btn--ghost" id="depCopy">Копировать</button>
     </div>
-    <div class="small muted mt">РњРёРЅРёРјСѓРј ${money(min)} Р·Р° Р·Р°СЏРІРєСѓ. Р—Р°СЏРІРєСѓ РІРёРґРёС‚ С‚РѕР»СЊРєРѕ С…РѕР·СЏРёРЅ.</div>
+    <div class="small muted mt">Минимум ${money(min)} за заявку. Заявку видит только хозяин.</div>
   `;
 
   const close = modal({
-    title: 'в­ђ РџРѕРїРѕР»РЅРёС‚СЊ Р·РІС‘Р·РґС‹',
-    sub: 'РџРѕРїРѕР»РЅРµРЅРёРµ РёРґС‘С‚ С‡РµСЂРµР· С…РѕР·СЏРёРЅР° РєР°Р·РёРЅРѕ',
+    title: '⭐ Пополнить звёзды',
+    sub: 'Пополнение идёт через хозяина казино',
     content: wrap,
     actions: [
       {
-        text: 'РЎРѕР·РґР°С‚СЊ Р·Р°СЏРІРєСѓ',
+        text: 'Создать заявку',
         async onClick() {
           const amount = Math.round(Number(wrap.querySelector('#depAmount')?.value));
           if (!amount || amount < min) {
-            toast(`РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР°: ${money(min)}`, 'err');
+            toast(`Минимальная сумма: ${money(min)}`, 'err');
             return false;
           }
           try {
@@ -538,22 +538,22 @@ function depositModal() {
             const dep = r.deposit;
             wrap.innerHTML = `
               <div class="center" style="padding:8px 0 4px">
-                <div style="font-size:44px;line-height:1">вњ…</div>
-                <div style="font-size:19px;font-weight:900;margin-top:6px">Р—Р°СЏРІРєР° #${escapeHtml(dep.id)}</div>
-                <div class="muted small" style="margin-top:4px">РЅР° ${money(dep.amount)} В· РѕР¶РёРґР°РµС‚ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ</div>
+                <div style="font-size:44px;line-height:1">✅</div>
+                <div style="font-size:19px;font-weight:900;margin-top:6px">Заявка #${escapeHtml(dep.id)}</div>
+                <div class="muted small" style="margin-top:4px">на ${money(dep.amount)} · ожидает подтверждения</div>
               </div>
               <div class="cashier-card">
                 <div class="ava">@</div>
-                <div style="flex:1"><div class="who">@${escapeHtml(cashier)}</div><div class="sub">РЅР°РїРёС€Рё Рё РѕС‚РїСЂР°РІСЊ РѕС„С„РµСЂ РЅР° ${money(dep.amount)}</div></div>
-                <button class="btn btn--sm btn--ghost" id="depCopy2">РљРѕРїРёСЂРѕРІР°С‚СЊ</button>
+                <div style="flex:1"><div class="who">@${escapeHtml(cashier)}</div><div class="sub">напиши и отправь оффер на ${money(dep.amount)}</div></div>
+                <button class="btn btn--sm btn--ghost" id="depCopy2">Копировать</button>
               </div>
-              <div class="small muted mt">РќРµ Р·Р°Р±СѓРґСЊ СѓРєР°Р·Р°С‚СЊ РЅРѕРјРµСЂ <b>#${escapeHtml(dep.id)}</b> РІ СЃРѕРѕР±С‰РµРЅРёРё вЂ” С‚Р°Рє С…РѕР·СЏРёРЅ Р±С‹СЃС‚СЂРµРµ РЅР°Р№РґС‘С‚ Р·Р°СЏРІРєСѓ.</div>
+              <div class="small muted mt">Не забудь указать номер <b>#${escapeHtml(dep.id)}</b> в сообщении — так хозяин быстрее найдёт заявку.</div>
             `;
             wrap.querySelector('#depCopy2')?.addEventListener('click', () => {
               copyText(`@${cashier}`);
-              toast('РќРёРє СЃРєРѕРїРёСЂРѕРІР°РЅ', 'ok');
+              toast('Ник скопирован', 'ok');
             });
-            toast('Р—Р°СЏРІРєР° СЃРѕР·РґР°РЅР°, Р¶РґС‘Рј РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ', 'ok');
+            toast('Заявка создана, ждём подтверждения', 'ok');
             app.haptic('success');
             renderDeposits();
             return false;
@@ -567,7 +567,7 @@ function depositModal() {
 
   wrap.querySelector('#depCopy')?.addEventListener('click', () => {
     copyText(`@${cashier}`);
-    toast('РќРёРє СЃРєРѕРїРёСЂРѕРІР°РЅ', 'ok');
+    toast('Ник скопирован', 'ok');
   });
   wrap.querySelector('#depPresets')?.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-dep]');
@@ -587,9 +587,9 @@ async function renderDeposits() {
   } catch {
     return;
   }
-  const labels = { pending: 'Р¶РґС‘С‚', approved: 'Р·Р°С‡РёСЃР»РµРЅРѕ', rejected: 'РѕС‚РєР»РѕРЅРµРЅРѕ' };
+  const labels = { pending: 'ждёт', approved: 'зачислено', rejected: 'отклонено' };
   if (!depositsCache.length) {
-    box.innerHTML = '<div class="small muted">Р—Р°СЏРІРѕРє РїРѕРєР° РЅРµС‚</div>';
+    box.innerHTML = '<div class="small muted">Заявок пока нет</div>';
     return;
   }
   box.innerHTML = depositsCache
@@ -604,7 +604,7 @@ async function renderDeposits() {
     .join('');
 }
 
-/* в”Ђв”Ђв”Ђ РІС‹РІРѕРґ Р·РІС‘Р·Рґ в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─── вывод звёзд ─────────────────────────────────────────────────────────── */
 let withdrawCache = [];
 
 function renderWithdraw() {
@@ -615,12 +615,12 @@ function renderWithdraw() {
   const min = Number(s.minWithdraw) || 1000;
   const max = Math.min(Number(s.maxWithdraw) || cap, cap);
   $('wdBalance').textContent = fmt(u.balance);
-  $('wdVaultLine').textContent = `Р’ Р±Р°РЅРєРµ: ${money(u.vault || 0)}`;
-  $('wdCap').textContent = `РґРѕ ${fmt(cap)} в­ђ`;
-  $('wdLimit').textContent = `Р›РёРјРёС‚: ${fmt(min)} вЂ“ ${fmt(max)} в­ђ Р·Р° Р·Р°СЏРІРєСѓ`;
+  $('wdVaultLine').textContent = `В банке: ${money(u.vault || 0)}`;
+  $('wdCap').textContent = `до ${fmt(cap)} ⭐`;
+  $('wdLimit').textContent = `Лимит: ${fmt(min)} – ${fmt(max)} ⭐ за заявку`;
   $('wdFeeNote').textContent = s.storageFee?.enabled
-    ? `РљРѕРјРёСЃСЃРёСЏ С…СЂР°РЅРёР»РёС‰Р°: ${s.storageFee.percentPerDay || 0}%/СЃСѓС‚РєРё СЃРІРµСЂС… ${fmt(s.storageFee.threshold || 0)} в­ђ В· СѓРєР°Р·Р°РЅР° РІ РёСЃС‚РѕСЂРёРё`
-    : 'РљРѕРјРёСЃСЃРёСЏ Р·Р° С…СЂР°РЅРµРЅРёРµ РІС‹РєР»СЋС‡РµРЅР°';
+    ? `Комиссия хранилища: ${s.storageFee.percentPerDay || 0}%/сутки сверх ${fmt(s.storageFee.threshold || 0)} ⭐ · указана в истории`
+    : 'Комиссия за хранение выключена';
   $('wdCashierName').textContent = `@${s.cashierUsername || 'crypt'}`;
   const input = $('wdAmount');
   if (input && !input.value) input.value = String(Math.min(max, Math.max(min, 5000)));
@@ -639,10 +639,10 @@ async function loadWithdrawals() {
   } catch {
     return;
   }
-  const labels = { pending: 'Р¶РґС‘С‚', approved: 'РІС‹РїР»Р°С‡РµРЅРѕ', rejected: 'РІРѕР·РІСЂР°С‚' };
+  const labels = { pending: 'ждёт', approved: 'выплачено', rejected: 'возврат' };
   $('wdCount').textContent = withdrawCache.length ? String(withdrawCache.length) : '';
   if (!withdrawCache.length) {
-    box.innerHTML = '<div class="small muted">Р—Р°СЏРІРѕРє РїРѕРєР° РЅРµС‚</div>';
+    box.innerHTML = '<div class="small muted">Заявок пока нет</div>';
     return;
   }
   box.innerHTML = withdrawCache
@@ -662,58 +662,58 @@ async function submitWithdraw() {
   const amount = Math.round(Number($('wdAmount')?.value));
   const contact = ($('wdContact')?.value || '').trim();
   if (!amount || amount < (Number(state.settings.minWithdraw) || 1000)) {
-    toast(`РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЃСѓРјРјР°: ${money(state.settings.minWithdraw || 1000)}`, 'err');
+    toast(`Минимальная сумма: ${money(state.settings.minWithdraw || 1000)}`, 'err');
     return;
   }
-  if (btn) { btn.disabled = true; btn.textContent = 'РЎРѕР·РґР°С‘РјвЂ¦'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Создаём…'; }
   try {
     const r = await api('/withdraw', { method: 'POST', body: { amount, contact } });
     const wd = r.withdrawal;
-    toast(`Р—Р°СЏРІРєР° #${wd.id} СЃРѕР·РґР°РЅР°`, 'ok');
+    toast(`Заявка #${wd.id} создана`, 'ok');
     app.haptic('success');
     $('wdAmount').value = '';
     $('wdContact').value = '';
     updateUser({ ...state.user, balance: state.user.balance - amount });
     renderWithdraw();
   } catch {} finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'РЎРѕР·РґР°С‚СЊ Р·Р°СЏРІРєСѓ рџ’ё'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Создать заявку 💸'; }
   }
 }
 
 async function topModal() {
   const wrap = document.createElement('div');
   wrap.innerHTML = spinner();
-  modal({ title: 'рџЏ† РўРѕРї РёРіСЂРѕРєРѕРІ', content: wrap });
+  modal({ title: '🏆 Топ игроков', content: wrap });
   try {
     const data = await api('/leaderboard', { silent: true });
     if (!data.top.length) {
-      wrap.innerHTML = '<div class="small muted">РџРѕРєР° РЅРёРєС‚Рѕ РЅРµ РёРіСЂР°Р».</div>';
+      wrap.innerHTML = '<div class="small muted">Пока никто не играл.</div>';
       return;
     }
     wrap.innerHTML = data.top
       .map((p) => {
-        const medal = ['рџҐ‡', 'рџҐ€', 'рџҐ‰'][p.place - 1] || `${p.place}.`;
+        const medal = ['🥇', '🥈', '🥉'][p.place - 1] || `${p.place}.`;
         const cls = p.net > 0 ? 'pos' : p.net < 0 ? 'neg' : '';
         return `<div class="user-row">
           <div style="width:26px;text-align:center;font-weight:800">${medal}</div>
-          <div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="sub">РјР°РєСЃ. РІС‹РёРіСЂС‹С€ ${fmt(p.win)}</div></div>
+          <div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="sub">макс. выигрыш ${fmt(p.win)}</div></div>
           <div class="bal ${cls}">${p.net >= 0 ? '+' : ''}${fmt(p.net)}</div>
         </div>`;
       })
       .join('');
   } catch {
-    wrap.innerHTML = '<div class="small muted">РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ С‚РѕРї.</div>';
+    wrap.innerHTML = '<div class="small muted">Не удалось загрузить топ.</div>';
   }
 }
 
 async function historyModal() {
   const wrap = document.createElement('div');
   wrap.innerHTML = spinner();
-  modal({ title: 'рџ§ѕ РСЃС‚РѕСЂРёСЏ СЃС‚Р°РІРѕРє', content: wrap });
+  modal({ title: '🧾 История ставок', content: wrap });
   try {
     const data = await api('/history?limit=50', { silent: true });
     if (!data.items.length) {
-      wrap.innerHTML = '<div class="small muted">РЎС‚Р°РІРѕРє РїРѕРєР° РЅРµ Р±С‹Р»Рѕ.</div>';
+      wrap.innerHTML = '<div class="small muted">Ставок пока не было.</div>';
       return;
     }
     wrap.innerHTML = data.items
@@ -722,22 +722,22 @@ async function historyModal() {
         const cls = delta > 0 ? 'pos' : delta < 0 ? 'neg' : '';
         const d = new Date(h.ts).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         return `<div class="user-row">
-          <div class="info"><div class="name">${h.detail || h.game}</div><div class="sub">${d} В· СЃС‚Р°РІРєР° ${fmt(h.bet)}</div></div>
+          <div class="info"><div class="name">${h.detail || h.game}</div><div class="sub">${d} · ставка ${fmt(h.bet)}</div></div>
           <div class="bal ${cls}">${delta > 0 ? '+' : ''}${fmt(delta)}</div>
         </div>`;
       })
       .join('');
   } catch {
-    wrap.innerHTML = '<div class="small muted">РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РёСЃС‚РѕСЂРёСЋ.</div>';
+    wrap.innerHTML = '<div class="small muted">Не удалось загрузить историю.</div>';
   }
 }
 
 function referralCopy() {
   const bot = state.settings.botUsername || '';
   const text = bot
-    ? `Р—Р°С…РѕРґРё РІ РєР°Р·РёРЅРѕ: @${bot} в†’ РЅР°РїРёС€Рё /start ${state.user.id}`
-    : `Р—Р°С…РѕРґРё РІ РєР°Р·РёРЅРѕ Рё РЅР°РїРёС€Рё Р±РѕС‚Сѓ /start ${state.user.id}`;
-  copyText(text).then(() => toast('РЎСЃС‹Р»РєР° СЃРєРѕРїРёСЂРѕРІР°РЅР°', 'ok'));
+    ? `Заходи в казино: @${bot} → напиши /start ${state.user.id}`
+    : `Заходи в казино и напиши боту /start ${state.user.id}`;
+  copyText(text).then(() => toast('Ссылка скопирована', 'ok'));
 }
 
 function supportChat() {
@@ -746,8 +746,8 @@ function supportChat() {
     app.openTelegramLink(`https://t.me/${bot.replace(/^@/, '')}`);
     return;
   }
-  copyText(bot ? `@${bot}` : 'РќР°РїРёС€Рё С…РѕР·СЏРёРЅСѓ РєР°Р·РёРЅРѕ РІ Wiftgram').then(() =>
-    toast('РљРѕРЅС‚Р°РєС‚ СЃРєРѕРїРёСЂРѕРІР°РЅ вЂ” РЅР°РїРёС€Рё С…РѕР·СЏРёРЅСѓ', 'ok')
+  copyText(bot ? `@${bot}` : 'Напиши хозяину казино в Wiftgram').then(() =>
+    toast('Контакт скопирован — напиши хозяину', 'ok')
   );
 }
 
