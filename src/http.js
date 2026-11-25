@@ -142,13 +142,13 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
     // Подменить ссылку чужим аккаунтом не получится: initData подписан ботом.
     if (requireInitData) {
       const raw = String(req.headers['x-wiftgram-init-data'] || '');
-      // Wiftgram не всегда подписывает initData. Если клиент прислал подпись —
-      // проверяем её; иначе разрешаем только сессию, выданную одноразовой кнопкой.
+      // Wiftgram не присылает подписанный initData. Если подпись есть — проверяем,
+      // иначе пускаем только сессию, выданную персональной кнопкой бота.
       const client = raw ? parseInitData(raw, CONFIG.token, 0) : null;
       if (raw && (!client || Number(client.user.id) !== data.userId)) {
         throw new CasinoError('ACCOUNT_MISMATCH', 'Сессия привязана к другому аккаунту. Открой казино заново из бота', 401);
       }
-      if (!raw && data.via !== 'unsafe') {
+      if (!raw && !['unsafe', 'token'].includes(data.via)) {
         throw new CasinoError('ACCOUNT_CHECK', 'Нужна проверка аккаунта: открой казино кнопкой в Wiftgram', 401);
       }
       // Новые токены дополнительно привязаны к конкретному запросу Wiftgram.
@@ -212,11 +212,14 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
         const linked = body.t ? verifyToken(String(body.t)) : null;
         const unsafe = body.unsafe && typeof body.unsafe === 'object' ? body.unsafe : null;
         const unsafeId = Number(unsafe?.user?.id || 0);
-        let viaUnsafe = false;
+        let via = '';
 
         if (requireInitData) {
           const signedOk = !!client && (!linked || Number(client.user.id) === linked.userId);
-          const unsafeOk = !client && !!linked && !!unsafeId && unsafeId === linked.userId;
+          const unsafeOk = !client && !rawInit && !!linked && !!unsafeId && unsafeId === linked.userId;
+          // Wiftgram не отдаёт ни initData, ни id клиента. Персональная кнопка
+          // бота всё равно привязана к аккаунту — других данных просто нет.
+          const tokenOk = !client && !rawInit && !!linked && !unsafeId;
           const wrongUser =
             (!!client && !!linked && Number(client.user.id) !== linked.userId) ||
             (!client && !!linked && !!unsafeId && unsafeId !== linked.userId);
@@ -226,8 +229,8 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
             console.warn(`[session] несовпадение аккаунта: ${who}, token=${linked?.userId || '-'}`);
             throw new CasinoError('ACCOUNT_MISMATCH', 'Эта ссылка выдана другому аккаунту. Открой казино из своего бота', 401);
           }
-          if (!signedOk && !unsafeOk) {
-            let why = 'нет initData и id клиента';
+          if (!signedOk && !unsafeOk && !tokenOk) {
+            let why = 'нет валидных данных клиента';
             if (rawInit) {
               const params = new URLSearchParams(rawInit);
               why = params.has('hash') ? 'плохая подпись или старый auth_date' : 'нет hash';
@@ -235,11 +238,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
             console.warn(`[session] проверка аккаунта не пройдена: ${why}; длина=${rawInit.length}; tokenLen=${CONFIG.token.length}`);
             throw new CasinoError('ACCOUNT_CHECK', 'Нужна проверка аккаунта: открой казино кнопкой в Wiftgram', 401);
           }
-          if (linked && !store.consumeLoginNonce(linked.nonce)) {
-            console.warn(`[session] ссылка уже использована: nonce=${linked.nonce || '-'}`);
-            throw new CasinoError('LINK_USED', 'Ссылка уже использована. Открой казино заново кнопкой в боте', 401);
-          }
-          viaUnsafe = unsafeOk;
+          via = unsafeOk ? 'unsafe' : tokenOk ? 'token' : '';
         } else {
           if (client && linked && Number(client.user.id) !== linked.userId) {
             throw new CasinoError('ACCOUNT_MISMATCH', 'Эта ссылка выдана другому аккаунту. Открой казино из своего бота', 401);
@@ -269,7 +268,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
         store.save();
         return sendJson(res, 200, {
           ok: true,
-          token: signToken(user.id, CONFIG.sessionTtlMs, client?.queryId || '', viaUnsafe ? 'unsafe' : ''),
+          token: signToken(user.id, CONFIG.sessionTtlMs, client?.queryId || '', via),
           user: publicUser(engine, user),
           settings: publicSettings(engine),
           storeName: store.settings.currency,
