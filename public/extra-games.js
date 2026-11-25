@@ -201,9 +201,11 @@ async function spinWheelNow() {
 }
 
 /* ══════════════════════════════ ПЛИНКО ══════════════════════════════ */
+const PLINKO_MAX_BALLS = 100;
+
 const plinko = {
   rows: 12,
-  risk: 'low',
+  risk: 'high',
   ballsCount: 1,
   table: null,
   allTables: null,
@@ -239,6 +241,14 @@ export function initPlinko() {
       setPlinkoBalls(Number(btn.dataset.plinkoBalls));
     });
   });
+  const ballsInput = $('plinkoBallsInput');
+  if (ballsInput) {
+    ballsInput.addEventListener('input', () => {
+      const n = Number(ballsInput.value);
+      if (Number.isFinite(n) && n >= 1) setPlinkoBalls(n, false);
+    });
+    ballsInput.addEventListener('change', () => setPlinkoBalls(ballsInput.value));
+  }
   document.querySelectorAll('[data-plinko-amt]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const v = btn.dataset.plinkoAmt;
@@ -267,7 +277,7 @@ async function refreshPlinkoTable() {
   const data = await gamesInfo();
   const tables = data.plinko?.[plinko.rows] || data.plinko?.['12'];
   plinko.allTables = data.plinko;
-  plinko.table = tables?.[plinko.risk] || tables?.low || null;
+  plinko.table = tables?.[plinko.risk] || tables?.high || null;
   const rtp = $('plinkoRtp');
   if (rtp && plinko.table) rtp.textContent = `RTP ${(100 - (state.settings.houseEdge?.plinko || 0.03) * 100).toFixed(0)}%`;
   renderPlinkoTotal();
@@ -282,9 +292,11 @@ function pluralBalls(count) {
   return `${n} шариков`;
 }
 
-function setPlinkoBalls(count) {
-  const n = Math.min(10, Math.max(1, Math.round(Number(count) || 1)));
+function setPlinkoBalls(count, syncInput = true) {
+  const n = Math.min(PLINKO_MAX_BALLS, Math.max(1, Math.round(Number(count) || 1)));
   plinko.ballsCount = n;
+  const input = $('plinkoBallsInput');
+  if (syncInput && input) input.value = String(n);
   document.querySelectorAll('[data-plinko-balls]').forEach((btn) => {
     btn.classList.toggle('active', Number(btn.dataset.plinkoBalls) === n);
   });
@@ -292,7 +304,7 @@ function setPlinkoBalls(count) {
 }
 
 function renderPlinkoTotal() {
-  const count = Math.min(10, Math.max(1, plinko.ballsCount || 1));
+  const count = Math.min(PLINKO_MAX_BALLS, Math.max(1, plinko.ballsCount || 1));
   const perBet = Math.max(0, readBet('plinkoAmount', 0));
   const total = perBet * count;
   const limit = maxBet('plinko');
@@ -419,7 +431,7 @@ function plinkoWaypoints(path) {
 async function animateBalls(paths) {
   const segs = paths[0].pts.length - 1;
   const baseDuration = 900 + plinko.rows * 22;
-  const delay = paths.length > 1 ? 180 : 0;
+  const delay = paths.length > 1 ? Math.max(12, Math.min(180, Math.round(900 / paths.length))) : 0;
   const totalMs = baseDuration + delay * (paths.length - 1);
   const start = performance.now();
   const hits = new Set();
@@ -474,7 +486,7 @@ function ballColor(multiplier) {
 async function dropPlinko() {
   if (plinko.animating) return;
   const amount = readBet('plinkoAmount');
-  const count = Math.min(10, Math.max(1, plinko.ballsCount || 1));
+  const count = Math.min(PLINKO_MAX_BALLS, Math.max(1, plinko.ballsCount || 1));
   if (!amount) return toast('Укажи ставку', 'err');
   const total = amount * count;
   const limit = maxBet('plinko');
@@ -505,10 +517,10 @@ async function dropPlinko() {
 
     const profit = res.profit;
     const el = $('plinkoResult');
-    const list = balls.map((b) => {
+    const list = balls.slice(0, 20).map((b) => {
       const color = b.multiplier < 1 ? '#FF5C7A' : b.multiplier < 2 ? '#EDF3FF' : '#FFC76A';
       return `<span style="color:${color}">x${b.multiplier}</span>`;
-    }).join(' · ');
+    }).join(' · ') + (balls.length > 20 ? ` · … ещё ${balls.length - 20}` : '');
 
     if (profit > 0) {
       el.innerHTML = `<div class="plinko-result-list">${list}</div><div class="gold mt">+${fmt(profit)} ⭐</div>`;
