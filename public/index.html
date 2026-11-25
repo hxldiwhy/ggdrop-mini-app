@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#050912" />
-  <meta name="description" content="GGDROP — премиальное казино в Wiftgram: краш, рулетка, кости, колесо и другие игры" />
+  <meta name="description" content="GGDROP — премиальное казино в Wiftgram: краш, рулетка, плинко, колесо и другие игры" />
   <title>GGDROP CASINO</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -73,11 +73,6 @@
             <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_crash" /></svg><span class="station__players" data-players="856">856</span></span>
             <span class="station__tag station__tag--hot">HOT</span>
             <span class="station__body"><span class="station__title">Краш</span><span class="station__sub">Успей забрать до взрыва</span></span>
-          </button>
-          <button class="station" data-go="dice">
-            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_dice" /></svg><span class="station__players" data-players="402">402</span></span>
-            <span class="station__tag">x49</span>
-            <span class="station__body"><span class="station__title">Кости</span><span class="station__sub">Больше или меньше</span></span>
           </button>
           <button class="station" data-go="plinko">
             <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_plinko" /></svg><span class="station__players" data-players="318">318</span></span>
@@ -232,68 +227,6 @@
           <div class="panel__title" style="font-size:13px">Проверяемость</div>
           <div class="small muted" style="word-break:break-all">Hash раунда: <span id="crashHash">—</span></div>
           <div class="small muted mt">Сервер публикует хеш до раунда, сид — после. Точка взрыва = HMAC(сид, раунд).</div>
-        </div>
-      </section>
-
-      <!-- ══════════════ КОСТИ ══════════════ -->
-      <section class="screen" id="screen-dice" data-screen="dice">
-        <div class="row row--between mb">
-          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
-          <div class="brand__name" style="font-size:14px">КОСТИ</div>
-          <div class="small muted">1–100</div>
-        </div>
-
-        <div class="dice-stage" id="diceStage" aria-hidden="true">
-          <div class="die die--a">
-            <i class="pip" style="grid-area:1/1"></i><i class="pip" style="grid-area:1/3"></i>
-            <i class="pip" style="grid-area:2/2"></i>
-            <i class="pip" style="grid-area:3/1"></i><i class="pip" style="grid-area:3/3"></i>
-          </div>
-          <div class="die die--b">
-            <i class="pip" style="grid-area:1/1"></i><i class="pip" style="grid-area:2/2"></i><i class="pip" style="grid-area:3/3"></i>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="dice-scale">
-            <div class="dice-track">
-              <div class="dice-targetline" id="diceTargetLine" style="left:50%"></div>
-              <div class="dice-marker" id="diceMarker" style="left:50%">50</div>
-            </div>
-            <div class="dice-labels"><span>1</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
-          </div>
-
-          <div class="row mt" style="gap:6px">
-            <button class="chip-btn active" id="diceOver" style="flex:1">Больше</button>
-            <button class="chip-btn" id="diceUnder" style="flex:1">Меньше</button>
-          </div>
-
-          <div class="mt">
-            <div class="row row--between"><label class="field" for="diceTarget">Порог</label><b id="diceTargetVal">50</b></div>
-            <input type="range" id="diceTarget" min="2" max="99" value="50" />
-            <div class="row row--between small muted">
-              <span>Шанс: <b id="diceChance">49%</b></span>
-              <span>Множитель: <b id="diceMult" class="gold">1.98x</b></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="bet-input">
-            <input type="number" id="diceAmount" placeholder="Ставка" min="1" inputmode="numeric" />
-            <span class="hint">⭐</span>
-          </div>
-          <div class="row mt dice-chips" style="gap:6px">
-            <button class="chip-btn" data-dice-amt="100">100</button>
-            <button class="chip-btn" data-dice-amt="500">500</button>
-            <button class="chip-btn" data-dice-amt="1000">1K</button>
-            <button class="chip-btn" data-dice-amt="5000">5K</button>
-            <button class="chip-btn" data-dice-amt="max">MAX</button>
-            <button class="chip-btn" data-dice-amt="half">½</button>
-            <button class="chip-btn" data-dice-amt="double">x2</button>
-          </div>
-          <button class="btn btn--block btn--lg mt" id="diceRoll">Бросить 🎲</button>
-          <div class="center mt" id="diceResult"></div>
         </div>
       </section>
 
@@ -485,15 +418,15 @@
         <div class="wd-hero">
           <div class="wd-hero__top">
             <span class="wd-hero__label">Доступно к выводу</span>
-            <span class="wd-hero__cap" id="wdCap">до 150 000 ⭐</span>
+            <span class="wd-hero__cap" id="wdCap">без лимита</span>
           </div>
           <div class="wd-hero__amount" id="wdBalance">0</div>
           <div class="wd-hero__sub">
             <span>⭐ звёзд на балансе</span>
-            <span id="wdVaultLine">В банке: 0 ⭐</span>
+            <span id="wdVaultLine">Без потолка баланса</span>
           </div>
           <div class="wd-progress"><span id="wdProgress"></span></div>
-          <div class="wd-hero__note" id="wdFeeNote">Комиссия хранилища: 0%/сутки сверх 100 000 ⭐</div>
+          <div class="wd-hero__note" id="wdFeeNote">Комиссия при выводе: 13% · указана в истории</div>
         </div>
 
         <div class="panel">
@@ -512,7 +445,7 @@
           </div>
           <label class="field mt">Куда написать (необязательно)</label>
           <input type="text" id="wdContact" placeholder="@username или комментарий для хозяина" maxlength="200" />
-          <div class="small muted mt" id="wdLimit">Лимит: 1 000 – 150 000 ⭐ за заявку</div>
+          <div class="small muted mt" id="wdLimit">Лимит: 1 000 – 1 000 000 ⭐ за заявку</div>
           <button class="btn btn--block btn--lg mt" id="wdSubmit">Создать заявку 💸</button>
         </div>
 
@@ -818,7 +751,8 @@
           </div>
           <div class="auc-quick mt" id="aucQuick"></div>
           <button class="btn btn--lg btn--block mt" id="aucBidBtn">Поставить ⭐</button>
-          <div class="small muted center mt">Перебитая ставка не возвращается — она сгорает. Победитель забирает подарок, его ставка уходит организатору лота.</div>
+          <div class="small muted center mt" id="aucReserved">Деньги ставки лежат в резерве и не сгорают, пока ты лидируешь.</div>
+          <div class="small muted center mt">Сгорает только перебитая ставка. Победитель забирает подарок, его ставка уходит организатору лота; при отмене лота резерв возвращается.</div>
         </div>
 
         <div class="panel" id="aucHostBox">
@@ -1038,7 +972,6 @@
       <symbol id="ic_bolt" viewBox="0 0 24 24"><path d="M13 2 5 13h6l-1 9 8-12h-6l1-8Z"/></symbol>
       <symbol id="ic_game_crash" viewBox="0 0 24 24"><path d="M4 19 20 5M14 5h6v6"/><path d="M4 15l4-4 3 3 4-5"/></symbol>
       <symbol id="ic_game_roulette" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M21 12h-6M12 21v-6M3 12h6"/></symbol>
-      <symbol id="ic_game_dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1"/><circle cx="15.5" cy="15.5" r="1"/><circle cx="12" cy="12" r="1"/></symbol>
       <symbol id="ic_game_blackjack" viewBox="0 0 24 24"><rect x="7" y="3" width="12" height="16" rx="2.5"/><path d="M7 7H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/></symbol>
       <symbol id="ic_game_wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v7M21 12h-7M12 21v-7M3 12h7M5.7 5.7l5 5M18.3 18.3l-5-5M18.3 5.7l-5 5M5.7 18.3l5-5"/></symbol>
       <symbol id="ic_game_plinko" viewBox="0 0 24 24"><path d="M12 3 3 20h18L12 3Z"/><circle cx="9" cy="10" r=".8"/><circle cx="15" cy="10" r=".8"/><circle cx="7" cy="15" r=".8"/><circle cx="12" cy="15" r=".8"/><circle cx="17" cy="15" r=".8"/></symbol>
@@ -1160,23 +1093,6 @@
           <rect x="92" y="94" width="18" height="9" rx="2" fill="#18273F"/>
           <rect x="112" y="94" width="18" height="9" rx="2" fill="#18273F"/>
           <rect x="132" y="94" width="18" height="9" rx="2" fill="#18273F"/>
-        </g>
-      </symbol>
-      <symbol id="art_dice" viewBox="0 0 200 120">
-        <rect width="200" height="120" fill="#050912"/>
-        <ellipse cx="100" cy="98" rx="58" ry="10" fill="#050912" opacity=".8"/>
-        <g transform="rotate(-12 72 58)">
-          <rect x="42" y="28" width="60" height="60" rx="14" fill="url(#artObsidian)" stroke="#18273F" stroke-width="2"/>
-          <g fill="#FFC76A">
-            <circle cx="58" cy="44" r="4"/><circle cx="86" cy="44" r="4"/><circle cx="72" cy="58" r="4"/>
-            <circle cx="58" cy="72" r="4"/><circle cx="86" cy="72" r="4"/>
-          </g>
-        </g>
-        <g transform="rotate(14 132 62)">
-          <rect x="102" y="32" width="60" height="60" rx="14" fill="url(#artObsidian)" stroke="#18273F" stroke-width="2"/>
-          <g fill="#FFC76A">
-            <circle cx="118" cy="48" r="4"/><circle cx="132" cy="62" r="4"/><circle cx="146" cy="76" r="4"/>
-          </g>
         </g>
       </symbol>
       <symbol id="art_coinflip" viewBox="0 0 200 120">
