@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050912" />
+  <meta name="description" content="GGDROP — премиальное казино в Wiftgram: краш, рулетка, кости, колесо и другие игры" />
+  <title>GGDROP CASINO</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand" id="brandLogo">
+        <div class="brand__logo"><span class="brand__monogram">G</span></div>
+        <div class="brand__name">GGDROP<span>PRIVATE CLUB</span></div>
+      </div>
+      <div class="topbar__right">
+        <button class="balance-pill" id="balancePill" type="button" aria-label="Баланс">
+          <span id="balanceValue">0</span>
+          <span class="coin">⭐</span>
+        </button>
+        <button class="topup-btn" id="topupBtn" type="button" aria-label="Пополнить">＋</button>
+      </div>
+    </header>
+
+    <main id="screens">
+      <!-- ══════════════ ГЛАВНАЯ ══════════════ -->
+      <section class="screen active" id="screen-home" data-screen="home">
+        <!-- Клубный герой -->
+        <div class="club-hero">
+          <svg class="club-hero__seal" viewBox="0 0 240 240" aria-hidden="true">
+            <circle cx="120" cy="120" r="108" fill="none" stroke="rgba(255,199,106,.35)" stroke-width="1"/>
+            <circle cx="120" cy="120" r="90" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+            <path d="M120 44l12 38 40 12-40 12-12 40-12-40-40-12 40-12 12-38Z" fill="rgba(255,199,106,.12)" stroke="#FFC76A" stroke-width="1.2"/>
+            <text x="120" y="200" text-anchor="middle" fill="rgba(255,199,106,.5)" font-size="10" letter-spacing="3">GGDROP</text>
+          </svg>
+          <div class="club-hero__chips" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="club-hero__content">
+            <div class="club-hero__badge"><span class="club-dot"></span>PRIVATE CLUB · ОТКРЫТ</div>
+            <h1>Ночная коллекция</h1>
+            <p>Семь столов, один приватный клуб. Ставки считает сервер — выплата сразу на баланс.</p>
+            <div class="club-hero__actions">
+              <button class="btn btn--gold" data-go="crash">Начать игру</button>
+              <button class="btn btn--ghost" id="heroDeposit">Пополнить</button>
+            </div>
+          </div>
+          <div class="club-hero__meta"><span>СТАВКИ <b>от 10 ⭐</b></span><i class="club-hero__sep"></i><span>ВЫПЛАТЫ <b>мгновенно</b></span></div>
+        </div>
+
+        <!-- Live-лента крупных выигрышей -->
+        <div class="live-feed" id="liveFeed">
+          <span class="live-feed__label">LIVE</span>
+          <div class="live-feed__viewport">
+            <div class="live-feed__track" id="liveFeedTrack"><span class="live-feed__item">Игроки уже выигрывают…</span></div>
+          </div>
+        </div>
+
+        <button class="resume-card hidden" id="resumeGame" type="button">
+          <span class="resume-card__icon"><svg id="resumeIcon" viewBox="0 0 24 24"><use href="#ic_game_crash" /></svg></span>
+          <span class="resume-card__text"><span class="label">Продолжить</span><span class="resume-card__name" id="resumeName">—</span></span>
+          <span class="resume-card__arrow" aria-hidden="true">→</span>
+        </button>
+
+        <div class="section-title"><span>Игры</span><span id="homeLimits" class="muted small"></span></div>
+        <div class="station-grid">
+          <button class="station" data-go="crash">
+            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_crash" /></svg><span class="station__players" data-players="856">856</span></span>
+            <span class="station__tag station__tag--hot">HOT</span>
+            <span class="station__body"><span class="station__title">Краш</span><span class="station__sub">Успей забрать до взрыва</span></span>
+          </button>
+          <button class="station" data-go="dice">
+            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_dice" /></svg><span class="station__players" data-players="402">402</span></span>
+            <span class="station__tag">x49</span>
+            <span class="station__body"><span class="station__title">Кости</span><span class="station__sub">Больше или меньше</span></span>
+          </button>
+          <button class="station" data-go="plinko">
+            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_plinko" /></svg><span class="station__players" data-players="318">318</span></span>
+            <span class="station__tag station__tag--new">NEW</span>
+            <span class="station__body"><span class="station__title">Плинко</span><span class="station__sub">Шарик летит по пирамиде</span></span>
+          </button>
+          <button class="station" data-go="roulette">
+            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_roulette" /></svg><span class="station__players" data-players="274">274</span></span>
+            <span class="station__tag">x36</span>
+            <span class="station__body"><span class="station__title">Рулетка</span><span class="station__sub">Европейская, 37 лунок</span></span>
+          </button>
+          <button class="station" data-go="wheel">
+            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_wheel" /></svg><span class="station__players" data-players="190">190</span></span>
+            <span class="station__tag">x50</span>
+            <span class="station__body"><span class="station__title">Колесо</span><span class="station__sub">Фортуна · до x50</span></span>
+          </button>
+          <button class="station" data-go="blackjack">
+            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_blackjack" /></svg><span class="station__players" data-players="233">233</span></span>
+            <span class="station__tag">x2.5</span>
+            <span class="station__body"><span class="station__title">Блэкджек</span><span class="station__sub">До 21 против дилера</span></span>
+          </button>
+          <button class="station station--wide" data-go="coinflip">
+            <span class="station__art"><svg viewBox="0 0 200 120" aria-hidden="true"><use href="#art_coinflip" /></svg><span class="station__players" data-players="511">511</span></span>
+            <span class="station__tag">x1.97</span>
+            <span class="station__body"><span class="station__title">Монетка</span><span class="station__sub">Орёл или решка · быстрый раунд</span></span>
+          </button>
+        </div>
+
+        <div class="section-title"><span>Быстрый доступ</span></div>
+        <div class="quick-grid">
+          <button class="quick-card" id="homeDaily" type="button">
+            <svg viewBox="0 0 24 24"><use href="#ic_gift" /></svg><span>Бонус</span>
+          </button>
+          <button class="quick-card" id="homePromo" type="button">
+            <svg viewBox="0 0 24 24"><use href="#ic_copy" /></svg><span>Промокод</span>
+          </button>
+          <button class="quick-card" id="homeTop" type="button">
+            <svg viewBox="0 0 24 24"><use href="#ic_top" /></svg><span>Топ</span>
+          </button>
+          <button class="quick-card" id="homeHistory" type="button">
+            <svg viewBox="0 0 24 24"><use href="#ic_history" /></svg><span>История</span>
+          </button>
+        </div>
+
+        <div class="panel club-note mt">
+          <div class="panel__title">Правила клуба</div>
+          <div class="panel__sub">Все ставки считает сервер — подкрутить результат из браузера нельзя. Выигрыш сразу падает на баланс звёздами. Пополнение — через хозяина казино, кнопка «＋» сверху. Играй ответственно: звёзды виртуальные.</div>
+        </div>
+      </section>
+
+      <!-- ══════════════ РУЛЕТКА ══════════════ -->
+      <section class="screen" id="screen-roulette" data-screen="roulette">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">РУЛЕТКА</div>
+          <div class="small muted" id="rouletteEdge"></div>
+        </div>
+
+        <div class="roulette-stage">
+          <div class="roulette-wheel" id="rouletteWheel">
+            <div class="roulette-wheel__inner">
+              <div class="roulette-wheel__num" id="rouletteNum">?</div>
+            </div>
+            <span class="roulette-wheel__ball" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb">
+            <div class="small muted">Фишка</div>
+            <div class="row" style="gap:5px" id="rouletteChips">
+              <button class="chip-btn" data-chip="10">10</button>
+              <button class="chip-btn active" data-chip="50">50</button>
+              <button class="chip-btn" data-chip="100">100</button>
+              <button class="chip-btn" data-chip="500">500</button>
+              <button class="chip-btn" data-chip="1000">1K</button>
+            </div>
+          </div>
+          <div class="num-grid" id="rouletteNumbers"></div>
+          <div class="outside-grid" id="rouletteOutside">
+            <button class="chip-btn" data-bet="red">🔴 Красное</button>
+            <button class="chip-btn" data-bet="black">⚫ Чёрное</button>
+            <button class="chip-btn" data-bet="even">Чёт</button>
+            <button class="chip-btn" data-bet="odd">Нечет</button>
+            <button class="chip-btn" data-bet="low">1–18</button>
+            <button class="chip-btn" data-bet="high">19–36</button>
+            <button class="chip-btn" data-bet="dozen1">1–12</button>
+            <button class="chip-btn" data-bet="dozen2">13–24</button>
+            <button class="chip-btn" data-bet="dozen3">25–36</button>
+            <button class="chip-btn" data-bet="column1">Кол. 1</button>
+            <button class="chip-btn" data-bet="column2">Кол. 2</button>
+            <button class="chip-btn" data-bet="column3">Кол. 3</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between">
+            <div class="small muted">Ставки на раунд</div>
+            <div class="small"><b id="rouletteTotal">0</b> <span class="muted">из</span> <span id="rouletteMax">—</span></div>
+          </div>
+          <div class="bet-list" id="rouletteBets"><div class="small muted">Выбери число или поле — ставка добавится сюда</div></div>
+          <div class="row mt" style="gap:8px">
+            <button class="btn btn--ghost btn--sm" id="rouletteClear">Очистить</button>
+            <button class="btn btn--block" id="rouletteSpin">Крутить 🎡</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ КРАШ ══════════════ -->
+      <section class="screen" id="screen-crash" data-screen="crash">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">КРАШ</div>
+          <div class="small muted" id="crashRound">#0</div>
+        </div>
+
+        <div class="crash-wrap">
+          <canvas class="crash-canvas" id="crashCanvas" width="440" height="190"></canvas>
+          <div class="crash-mult" id="crashMult">1.00x</div>
+        </div>
+        <div class="crash-status" id="crashStatus">Загрузка…</div>
+        <div class="history-strip" id="crashHistory"></div>
+
+        <div class="panel mt">
+          <div class="row" style="gap:8px">
+            <div class="bet-input" style="flex:1">
+              <input type="number" id="crashAmount" placeholder="Ставка" min="1" inputmode="numeric" />
+              <span class="hint">⭐</span>
+            </div>
+            <div class="bet-input" style="flex:1">
+              <input type="number" id="crashAuto" placeholder="Авто" min="1.01" step="0.1" inputmode="decimal" />
+              <span class="hint">x</span>
+            </div>
+          </div>
+          <div class="row mt" style="gap:6px">
+            <button class="chip-btn" data-crash-amt="100">100</button>
+            <button class="chip-btn" data-crash-amt="500">500</button>
+            <button class="chip-btn" data-crash-amt="1000">1K</button>
+            <button class="chip-btn" data-crash-amt="5000">5K</button>
+            <button class="chip-btn" data-crash-amt="max">MAX</button>
+          </div>
+          <button class="btn btn--green btn--block btn--lg mt" id="crashAction">Сделать ставку</button>
+          <div class="small muted center mt" id="crashHint"></div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb"><div class="panel__title" style="font-size:13px">Игроки раунда</div><div class="small muted" id="crashPlayersCount"></div></div>
+          <div class="players" id="crashPlayers"><div class="small muted">Пока никого…</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__title" style="font-size:13px">Проверяемость</div>
+          <div class="small muted" style="word-break:break-all">Hash раунда: <span id="crashHash">—</span></div>
+          <div class="small muted mt">Сервер публикует хеш до раунда, сид — после. Точка взрыва = HMAC(сид, раунд).</div>
+        </div>
+      </section>
+
+      <!-- ══════════════ КОСТИ ══════════════ -->
+      <section class="screen" id="screen-dice" data-screen="dice">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">КОСТИ</div>
+          <div class="small muted">1–100</div>
+        </div>
+
+        <div class="dice-stage" id="diceStage" aria-hidden="true">
+          <div class="die die--a">
+            <i class="pip" style="grid-area:1/1"></i><i class="pip" style="grid-area:1/3"></i>
+            <i class="pip" style="grid-area:2/2"></i>
+            <i class="pip" style="grid-area:3/1"></i><i class="pip" style="grid-area:3/3"></i>
+          </div>
+          <div class="die die--b">
+            <i class="pip" style="grid-area:1/1"></i><i class="pip" style="grid-area:2/2"></i><i class="pip" style="grid-area:3/3"></i>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="dice-scale">
+            <div class="dice-track">
+              <div class="dice-targetline" id="diceTargetLine" style="left:50%"></div>
+              <div class="dice-marker" id="diceMarker" style="left:50%">50</div>
+            </div>
+            <div class="dice-labels"><span>1</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+          </div>
+
+          <div class="row mt" style="gap:6px">
+            <button class="chip-btn active" id="diceOver" style="flex:1">Больше</button>
+            <button class="chip-btn" id="diceUnder" style="flex:1">Меньше</button>
+          </div>
+
+          <div class="mt">
+            <div class="row row--between"><label class="field" for="diceTarget">Порог</label><b id="diceTargetVal">50</b></div>
+            <input type="range" id="diceTarget" min="2" max="99" value="50" />
+            <div class="row row--between small muted">
+              <span>Шанс: <b id="diceChance">49%</b></span>
+              <span>Множитель: <b id="diceMult" class="gold">1.98x</b></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="bet-input">
+            <input type="number" id="diceAmount" placeholder="Ставка" min="1" inputmode="numeric" />
+            <span class="hint">⭐</span>
+          </div>
+          <div class="row mt dice-chips" style="gap:6px">
+            <button class="chip-btn" data-dice-amt="100">100</button>
+            <button class="chip-btn" data-dice-amt="500">500</button>
+            <button class="chip-btn" data-dice-amt="1000">1K</button>
+            <button class="chip-btn" data-dice-amt="5000">5K</button>
+            <button class="chip-btn" data-dice-amt="max">MAX</button>
+            <button class="chip-btn" data-dice-amt="half">½</button>
+            <button class="chip-btn" data-dice-amt="double">x2</button>
+          </div>
+          <button class="btn btn--block btn--lg mt" id="diceRoll">Бросить 🎲</button>
+          <div class="center mt" id="diceResult"></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ БЛЭКДЖЕК ══════════════ -->
+      <section class="screen" id="screen-blackjack" data-screen="blackjack">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">БЛЭКДЖЕК</div>
+          <div class="small muted" id="bjBetLabel"></div>
+        </div>
+
+        <div class="bj-table">
+          <div class="hand-label">Дилер <span id="bjDealerTotal"></span></div>
+          <div class="hand" id="bjDealer">
+            <div class="card back card--ghost">G</div>
+            <div class="card back card--ghost">G</div>
+          </div>
+          <div class="hand-label" style="margin-top:16px">Ты <span id="bjPlayerTotal"></span></div>
+          <div class="hand" id="bjPlayer">
+            <div class="card card--ghost">G<span class="suit">♠</span></div>
+            <div class="card card--ghost">G<span class="suit">♦</span></div>
+          </div>
+          <div class="bj-empty-note" id="bjEmptyNote">Сделай ставку, чтобы начать</div>
+          <div class="bj-result hidden" id="bjResult"></div>
+        </div>
+
+        <div class="panel" id="bjBetPanel">
+          <div class="bet-input">
+            <input type="number" id="bjAmount" placeholder="Ставка" min="1" inputmode="numeric" />
+            <span class="hint">⭐</span>
+          </div>
+          <div class="row mt" style="gap:6px">
+            <button class="chip-btn" data-bj-amt="100">100</button>
+            <button class="chip-btn" data-bj-amt="500">500</button>
+            <button class="chip-btn" data-bj-amt="1000">1K</button>
+            <button class="chip-btn" data-bj-amt="5000">5K</button>
+            <button class="chip-btn" data-bj-amt="max">MAX</button>
+          </div>
+          <button class="btn btn--block btn--lg mt" id="bjStart">Раздать</button>
+        </div>
+
+        <div class="panel hidden" id="bjActions">
+          <div class="row" style="gap:8px">
+            <button class="btn btn--green" style="flex:1" id="bjHit">Ещё</button>
+            <button class="btn btn--ghost" style="flex:1" id="bjStand">Хватит</button>
+            <button class="btn btn--violet" style="flex:1" id="bjDouble">x2</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ КОЛЕСО ══════════════ -->
+      <section class="screen" id="screen-wheel" data-screen="wheel">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">КОЛЕСО</div>
+          <div class="small muted" id="wheelRtp"></div>
+        </div>
+
+        <div class="wheel-stage">
+          <div class="wheel-pointer">▼</div>
+          <canvas id="wheelCanvas" width="640" height="640"></canvas>
+          <div class="wheel-hub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.6 6.9L21.5 12l-6.9 2.6L12 21.5l-2.6-6.9L2.5 12l6.9-2.6L12 2.5Z" fill="none" stroke="#FFC76A" stroke-width="1.2"/><circle cx="12" cy="12" r="2" fill="#FFC76A"/></svg></div>
+        </div>
+
+        <div class="center mt" id="wheelResult" style="min-height:34px;font-weight:900;font-size:18px"></div>
+
+        <div class="panel">
+          <div class="bet-input">
+            <input type="number" id="wheelAmount" placeholder="Ставка" min="1" inputmode="numeric" />
+            <span class="hint">⭐</span>
+          </div>
+          <div class="row mt" style="gap:6px">
+            <button class="chip-btn" data-wheel-amt="100">100</button>
+            <button class="chip-btn" data-wheel-amt="500">500</button>
+            <button class="chip-btn" data-wheel-amt="1000">1K</button>
+            <button class="chip-btn" data-wheel-amt="5000">5K</button>
+            <button class="chip-btn" data-wheel-amt="max">MAX</button>
+          </div>
+          <button class="btn btn--block btn--lg mt" id="wheelSpin">Крутить колесо</button>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb"><div class="panel__title" style="font-size:13px">Секторы и шансы</div><div class="small muted" id="wheelSectorCount"></div></div>
+          <div class="sector-list" id="wheelSectors"></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ПЛИНКО ══════════════ -->
+      <section class="screen" id="screen-plinko" data-screen="plinko">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">ПЛИНКО</div>
+          <div class="small muted" id="plinkoRtp"></div>
+        </div>
+
+        <div class="plinko-stage">
+          <canvas id="plinkoCanvas" width="840" height="700"></canvas>
+        </div>
+        <div class="center mt" id="plinkoResult" style="min-height:30px;font-weight:900;font-size:17px"></div>
+
+        <div class="panel">
+          <div class="row" style="gap:8px">
+            <div style="flex:1">
+              <label class="field" style="margin-top:0">Рядов</label>
+              <select id="plinkoRows">
+                <option value="8">8</option>
+                <option value="10">10</option>
+                <option value="12" selected>12</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+              </select>
+            </div>
+            <div style="flex:1.4">
+              <label class="field" style="margin-top:0">Риск</label>
+              <div class="row" style="gap:5px">
+                <button class="chip-btn active" data-risk="low" style="flex:1;padding:9px 4px;font-size:11.5px">Низкий</button>
+                <button class="chip-btn" data-risk="medium" style="flex:1;padding:9px 4px;font-size:11.5px">Средний</button>
+                <button class="chip-btn" data-risk="high" style="flex:1;padding:9px 4px;font-size:11.5px">Высокий</button>
+              </div>
+            </div>
+          </div>
+          <div class="plinko-count-row mt">
+            <span class="field plinko-count-row__label">Шарики</span>
+            <div class="plinko-count" id="plinkoBalls">
+              <button class="chip-btn active" data-plinko-balls="1">1</button>
+              <button class="chip-btn" data-plinko-balls="2">2</button>
+              <button class="chip-btn" data-plinko-balls="3">3</button>
+              <button class="chip-btn" data-plinko-balls="5">5</button>
+              <button class="chip-btn" data-plinko-balls="10">10</button>
+            </div>
+          </div>
+          <div class="bet-input mt">
+            <input type="number" id="plinkoAmount" placeholder="Ставка за шарик" min="1" inputmode="numeric" />
+            <span class="hint">⭐</span>
+          </div>
+          <div class="plinko-total" id="plinkoTotal">Ставка за один шарик · лимит на сумму</div>
+          <div class="row mt" style="gap:6px">
+            <button class="chip-btn" data-plinko-amt="100">100</button>
+            <button class="chip-btn" data-plinko-amt="500">500</button>
+            <button class="chip-btn" data-plinko-amt="1000">1K</button>
+            <button class="chip-btn" data-plinko-amt="5000">5K</button>
+            <button class="chip-btn" data-plinko-amt="max">MAX</button>
+          </div>
+          <button class="btn btn--block btn--lg mt" id="plinkoDrop">Запустить 1 шарик</button>
+        </div>
+      </section>
+
+      <!-- ══════════════ МОНЕТКА ══════════════ -->
+      <!-- ══════════════ МОНЕТКА ══════════════ -->
+      <section class="screen" id="screen-coinflip" data-screen="coinflip">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">МОНЕТКА</div>
+          <div class="small muted">x1.97</div>
+        </div>
+
+        <div class="coinflip-stage" id="coinStage">
+          <div class="coin-orbit">
+            <div class="flip-coin" id="flipCoin">
+              <div class="flip-coin__face flip-coin__face--front"><span class="flip-coin__mark">★</span></div>
+              <div class="flip-coin__face flip-coin__face--back"><span class="flip-coin__mark">G</span></div>
+            </div>
+          </div>
+          <div class="stage-caption" id="coinCaption">выбери сторону</div>
+        </div>
+        <div class="center mt" id="coinResult" style="min-height:24px;font-weight:800"></div>
+
+        <div class="panel">
+          <div class="row" style="gap:6px">
+            <button class="chip-btn active" data-coin-side="heads" style="flex:1">Орёл</button>
+            <button class="chip-btn" data-coin-side="tails" style="flex:1">Решка</button>
+          </div>
+          <div class="bet-input mt">
+            <input type="number" id="coinAmount" placeholder="Ставка" min="10" inputmode="numeric" />
+            <span class="hint">⭐</span>
+          </div>
+          <button class="btn btn--lg btn--block mt" id="coinFlip">Подбросить</button>
+          <div class="small muted center mt">Победитель получает x1.97 ⭐ за ставку, проигравший — 0 ⭐.</div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ВЫВОД ══════════════ -->
+      <section class="screen" id="screen-withdraw" data-screen="withdraw">
+        <div class="row row--between mb">
+          <button class="btn btn--sm btn--ghost" data-go="home">← Назад</button>
+          <div class="brand__name" style="font-size:14px">ВЫВОД СТARS</div>
+          <button class="btn btn--sm btn--ghost" id="wdRefresh">↻</button>
+        </div>
+
+        <div class="wd-hero">
+          <div class="wd-hero__top">
+            <span class="wd-hero__label">Доступно к выводу</span>
+            <span class="wd-hero__cap" id="wdCap">до 150 000 ⭐</span>
+          </div>
+          <div class="wd-hero__amount" id="wdBalance">0</div>
+          <div class="wd-hero__sub">
+            <span>⭐ звёзд на балансе</span>
+            <span id="wdVaultLine">В банке: 0 ⭐</span>
+          </div>
+          <div class="wd-progress"><span id="wdProgress"></span></div>
+          <div class="wd-hero__note" id="wdFeeNote">Комиссия хранилища: 0%/сутки сверх 100 000 ⭐</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__title" style="font-size:13px">Сумма вывода</div>
+          <div class="bet-input mt">
+            <input type="number" id="wdAmount" placeholder="Минимум 1 000" min="1000" inputmode="numeric" />
+            <span class="hint">⭐</span>
+          </div>
+          <div class="amount-grid" id="wdPresets">
+            <button class="chip-btn" data-wd="1000">1K</button>
+            <button class="chip-btn active" data-wd="5000">5K</button>
+            <button class="chip-btn" data-wd="10000">10K</button>
+            <button class="chip-btn" data-wd="25000">25K</button>
+            <button class="chip-btn" data-wd="50000">50K</button>
+            <button class="chip-btn" data-wd="max">Всё</button>
+          </div>
+          <label class="field mt">Куда написать (необязательно)</label>
+          <input type="text" id="wdContact" placeholder="@username или комментарий для хозяина" maxlength="200" />
+          <div class="small muted mt" id="wdLimit">Лимит: 1 000 – 150 000 ⭐ за заявку</div>
+          <button class="btn btn--block btn--lg mt" id="wdSubmit">Создать заявку 💸</button>
+        </div>
+
+        <div class="panel panel--warm">
+          <div class="panel__title" style="font-size:13px">Как проходит вывод</div>
+          <div class="deposit-steps mt">
+            <div class="deposit-step"><span class="num">1</span><span>Создай заявку — сумма сразу резервируется, её нельзя потратить в игре.</span></div>
+            <div class="deposit-step"><span class="num">2</span><span>Хозяину придёт сообщение в Wiftgram с кнопками «Выплачено» / «Отклонить».</span></div>
+            <div class="deposit-step"><span class="num">3</span><span>Напиши <b id="wdCashierName">@crypt</b> и укажи номер заявки. Если отклонят — звёзды вернутся.</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb">
+            <div class="panel__title" style="font-size:13px">Мои заявки</div>
+            <div class="small muted" id="wdCount"></div>
+          </div>
+          <div class="deposit-list" id="wdList"><div class="small muted">Заявок пока нет</div></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ПРОФИЛЬ ══════════════ -->
+      <section class="screen" id="screen-profile" data-screen="profile">
+        <!-- По стилистике присланных скриншотов: крупная карточка игрока -->
+        <div class="profile-hero">
+          <div class="profile-hero__top">
+            <div class="avatar avatar--lg" id="profileAvatar">?</div>
+            <div style="min-width:0;flex:1">
+              <div class="profile-name"><span id="profileName">Игрок</span><span class="owner-badge hidden" id="profileOwner">HOST</span></div>
+              <div class="profile-id" id="profileId">id —</div>
+              <div class="profile-hero__safe"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_shield" /></svg>Аккаунт защищён</div>
+            </div>
+          </div>
+          <div class="profile-hero__balance">
+            <span class="small muted">Мой баланс</span>
+            <div><b class="gold" id="heroBalanceValue">0</b><span class="coin">⭐</span></div>
+          </div>
+          <div class="profile-hero__sub" id="heroVaultLine">В банке: 0 ⭐</div>
+          <div class="profile-hero__actions">
+            <button class="btn btn--sm" data-go="withdraw"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_cashout" /></svg>Вывод</button>
+            <button class="btn btn--sm btn--ghost" id="profileTopupHero"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_coin" /></svg>Пополнить</button>
+          </div>
+        </div>
+
+        <div class="panel vip-card" id="vipCard">
+          <div class="row row--between">
+            <div>
+              <div class="panel__title" style="font-size:13px">⚡ VP система</div>
+              <div class="panel__sub" id="vipLabel">Уровень 1 · Новичок</div>
+            </div>
+            <div class="vip-badge" id="vipLevel">LV 1</div>
+          </div>
+          <div class="vip-bar mt"><span id="vipProgress"></span></div>
+          <div class="small muted mt" id="vipNext">Играй, чтобы открыть следующий уровень</div>
+        </div>
+
+        <div class="menu-grid">
+          <button class="menu-tile" data-profile-action="history"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_history" /></svg></span><span>История<br/>баланса</span></button>
+          <button class="menu-tile" data-profile-action="top"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_top" /></svg></span><span>Лидерборд</span></button>
+          <button class="menu-tile" data-profile-action="promo"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_ticket" /></svg></span><span>Промокод</span></button>
+          <button class="menu-tile" data-profile-action="friends"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_users" /></svg></span><span>Друзья <b id="friendsCount">0</b></span></button>
+          <button class="menu-tile" data-profile-action="withdraw"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_cashout" /></svg></span><span>Вывод</span></button>
+          <button class="menu-tile" data-profile-action="support"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_support" /></svg></span><span>Поддержка</span></button>
+          <button class="menu-tile" data-profile-action="daily"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_gift" /></svg></span><span>Бонус</span></button>
+          <button class="menu-tile" data-profile-action="vip"><span class="menu-tile__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_bolt" /></svg></span><span>VP статус</span></button>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat"><div class="stat__label">Баланс</div><div class="stat__value emerald-num" id="statBalance">0</div></div>
+          <div class="stat"><div class="stat__label">Профит</div><div class="stat__value" id="statProfit">0</div></div>
+          <div class="stat"><div class="stat__label">Игр</div><div class="stat__value" id="statGames">0</div></div>
+          <div class="stat"><div class="stat__label">Winrate</div><div class="stat__value" id="statWinrate">0%</div></div>
+        </div>
+
+        <!-- Lucky Wheel: бесплатное колесо раз в 24ч -->
+        <div class="panel" id="luckyPanel">
+          <div class="row row--between">
+            <div>
+              <div class="panel__title" style="font-size:13px">🎡 Lucky Wheel</div>
+              <div class="panel__sub" id="luckyHint">Бесплатный спин раз в 24 часа · до 15 000 ⭐</div>
+            </div>
+            <button class="btn btn--sm btn--gold" id="luckySpinBtn">Крутить</button>
+          </div>
+          <div class="lucky-wheel-wrap">
+            <div class="lucky-wheel" id="luckyWheel">
+              <div class="lucky-wheel__pointer"></div>
+              <div class="lucky-wheel__hub" id="luckyHub">GO</div>
+            </div>
+            <div class="lucky-prize" id="luckyPrize"></div>
+            <div class="lucky-cooldown" id="luckyCooldown"></div>
+          </div>
+        </div>
+
+        <!-- NFT-коллекция: дропы за крупные выигрыши -->
+        <div class="panel">
+          <div class="row row--between mb">
+            <div class="panel__title" style="font-size:13px">🖼 NFT-коллекция</div>
+            <div class="small muted" id="nftCount"></div>
+          </div>
+          <div class="nft-grid" id="nftGrid"><div class="nft-empty">Пока пусто — крупные выигрыши дропают NFT</div></div>
+        </div>
+
+        <div class="panel" id="walletPanel">
+          <div class="row row--between">
+            <div>
+              <div class="panel__title" style="font-size:13px">🏦 Кошелёк и лимит</div>
+              <div class="panel__sub" id="walletHint">Потолок баланса 150 000 ⭐</div>
+            </div>
+            <button class="btn btn--sm btn--ghost" data-go="withdraw">Вывод</button>
+          </div>
+          <div class="wallet-bar mt"><span id="walletBar"></span></div>
+          <div class="kv mt"><span class="kv__k">В банке</span><span class="kv__v gold" id="statVault">0</span></div>
+          <div class="kv"><span class="kv__k">Комиссия за хранение</span><span class="kv__v" id="statFee">—</span></div>
+          <div class="kv"><span class="kv__k">Уплачено комиссий</span><span class="kv__v" id="statFeePaid">0</span></div>
+          <div class="small muted mt" id="feeHint"></div>
+        </div>
+
+        <div class="invite-banner">
+          <div class="invite-banner__icon">🎁</div>
+          <div class="invite-banner__text">
+            <b>Приглашай друзей!</b>
+            <span>Зарабатывай бонусы и награды вместе с ними</span>
+          </div>
+          <button class="btn btn--sm" id="inviteCopy">Пригласить друга</button>
+        </div>
+
+        <div class="panel panel--warm">
+          <div class="row row--between">
+            <div>
+              <div class="panel__title">🎁 Ежедневный бонус</div>
+              <div class="panel__sub" id="dailyHint">Забери бесплатные фишки</div>
+            </div>
+            <button class="btn btn--sm" id="profileDaily">Забрать</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between">
+            <div>
+              <div class="panel__title">⭐ Пополнить звёзды</div>
+              <div class="panel__sub" id="topupHint">Через хозяина казино · заявка</div>
+            </div>
+            <button class="btn btn--sm" id="profileTopup">Пополнить</button>
+          </div>
+          <div class="deposit-list" id="depositList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__title" style="font-size:13px">🎟 Промокод</div>
+          <div class="row mt" style="gap:8px">
+            <input type="text" id="promoInput" placeholder="Введи код" style="flex:1;text-transform:uppercase" />
+            <button class="btn btn--sm" id="promoApply">ОК</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb"><div class="panel__title" style="font-size:13px">🧾 Последние ставки</div><div class="small muted" id="historyCount"></div></div>
+          <div class="history-list" id="historyList"><div class="small muted">Пока пусто</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__title" style="font-size:13px">👥 Пригласи друзей</div>
+          <div class="panel__sub mt">За каждого друга, который зайдёт по твоей ссылке, ты получаешь бонус.</div>
+          <button class="btn btn--ghost btn--block mt" id="referralCopy">Скопировать ссылку</button>
+        </div>
+      </section>
+
+      <!-- ══════════════ КОШЕЛЁК ══════════════ -->
+      <section class="screen" id="screen-wallet" data-screen="wallet">
+        <div class="screen-head">
+          <div>
+            <div class="screen-head__title">Кошелёк</div>
+            <div class="screen-head__meta">баланс · вывод · лимиты</div>
+          </div>
+          <button class="btn btn--icon btn--ghost" data-ui="refresh" aria-label="Обновить"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5"><use href="#ic_refresh" /></svg></button>
+        </div>
+
+        <div class="wallet-hero">
+          <div class="label">Доступно на балансе</div>
+          <div class="wallet-hero__amount" data-balance>0</div>
+          <div class="wallet-hero__sub" id="walletVault">В банке: 0 ⭐</div>
+        </div>
+
+        <div class="quick-grid">
+          <button class="quick-tile" data-ui="deposit"><svg viewBox="0 0 24 24"><use href="#ic_coin" /></svg>Пополнить</button>
+          <button class="quick-tile" data-go="withdraw"><svg viewBox="0 0 24 24"><use href="#ic_cashout" /></svg>Вывод</button>
+          <button class="quick-tile" data-go="history"><svg viewBox="0 0 24 24"><use href="#ic_history" /></svg>История</button>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Способы пополнения</div>
+          <div class="method-row"><span class="method-row__icon">◈</span><span class="method-row__text"><b>TON</b><span>через хозяина казино</span></span><button class="btn btn--sm btn--ghost" data-ui="deposit">Открыть</button></div>
+          <div class="method-row"><span class="method-row__icon">◇</span><span class="method-row__text"><b>Криптовалюта</b><span>по договорённости с кассиром</span></span><button class="btn btn--sm btn--ghost" data-ui="deposit">Открыть</button></div>
+          <div class="method-row"><span class="method-row__icon">▭</span><span class="method-row__text"><b>Карта / подарок</b><span>звёзды Wiftgram через кассира</span></span><button class="btn btn--sm btn--ghost" data-ui="deposit">Открыть</button></div>
+          <div class="cap-note mt">Все операции проходят через хозяина вручную: это видно в истории, статус заявки — pending / success / fail. Автоматического списания с карты нет.</div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Лимит баланса и комиссия</div>
+          <div class="kv"><span class="kv__k">Потолок баланса</span><span class="kv__v" id="walletCap">150 000 ⭐</span></div>
+          <div class="kv"><span class="kv__k">Комиссия хранения</span><span class="kv__v" id="walletFee">—</span></div>
+          <div class="kv"><span class="kv__k">Вывод за заявку</span><span class="kv__v" id="walletWithdraw">—</span></div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb"><span class="label">Последние операции</span><button class="btn btn--sm btn--ghost" data-go="history">Все</button></div>
+          <div id="walletTx"><div class="small muted">Загрузка…</div></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ЗАДАНИЯ ══════════════ -->
+      <section class="screen" id="screen-tasks" data-screen="tasks">
+        <div class="screen-head">
+          <div>
+            <div class="screen-head__title">Задания</div>
+            <div class="screen-head__meta">бонусы · прогресс</div>
+          </div>
+          <button class="btn btn--sm btn--ghost" data-ui="promo">Промокод</button>
+        </div>
+
+        <div class="panel panel--accent">
+          <div class="row row--between">
+            <div>
+              <div class="panel__title">Ежедневный бонус</div>
+              <div class="panel__sub" id="taskDailyHint">Забери бесплатные звёзды</div>
+            </div>
+            <button class="btn" id="taskDailyBtn">Забрать</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Календарь 7 дней</div>
+          <div class="day-grid" id="taskDays"></div>
+          <div class="small muted" id="taskStreak">Серия дней: 0</div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Задачи</div>
+          <div class="task-row">
+            <div class="task-row__main"><b>Сделай 10 ставок</b><span id="taskGamesSub">0 / 10</span><div class="task-progress"><span id="taskGamesBar" style="width:0%"></span></div></div>
+            <button class="btn btn--sm btn--ghost" data-go="home">Играть</button>
+          </div>
+          <div class="task-row">
+            <div class="task-row__main"><b>Оборот 10 000 ⭐</b><span id="taskWagerSub">0 / 10 000</span><div class="task-progress"><span id="taskWagerBar" style="width:0%"></span></div></div>
+            <button class="btn btn--sm btn--ghost" data-go="home">Играть</button>
+          </div>
+          <div class="task-row">
+            <div class="task-row__main"><b>Пригласи друга</b><span id="taskRefSub">0 / 1</span><div class="task-progress"><span id="taskRefBar" style="width:0%"></span></div></div>
+            <button class="btn btn--sm btn--ghost" data-ui="invite">Копировать</button>
+          </div>
+        </div>
+
+        <div class="panel vip-card">
+          <div class="row row--between"><div><div class="panel__title">VP статус</div><div class="panel__sub" id="taskVipLabel">Уровень 1</div></div><div class="vip-badge" id="taskVipBadge">LV 1</div></div>
+          <div class="vip-bar mt"><span id="taskVipBar" style="width:0%"></span></div>
+          <button class="btn btn--ghost btn--block mt" data-go="vip">Все уровни</button>
+        </div>
+      </section>
+
+      <!-- ══════════════ ТОП / ЛИГА ══════════════ -->
+      <section class="screen" id="screen-top" data-screen="top">
+        <div class="screen-head">
+          <div>
+            <div class="screen-head__title">Лига</div>
+            <div class="screen-head__meta">неделя · приз</div>
+          </div>
+          <div class="label">TOP-10</div>
+        </div>
+
+        <div class="panel panel--accent">
+          <div class="row row--between"><div><div class="panel__title">Приз недели</div><div class="panel__sub">Топ-3 по чистому профиту</div></div><div class="vip-badge">⭐</div></div>
+        </div>
+
+        <div class="podium" id="topPodium"></div>
+        <div class="panel" id="topList"><div class="small muted">Загрузка…</div></div>
+        <div class="my-rank" id="topMine">Твоя позиция: —</div>
+      </section>
+
+      <!-- ══════════════ АУКЦИОН ══════════════ -->
+      <section class="screen" id="screen-auction" data-screen="auction">
+        <div class="screen-head">
+          <div>
+            <div class="screen-head__title">Аукцион</div>
+            <div class="screen-head__meta">лоты игроков · ставки сгорают</div>
+          </div>
+          <button class="btn btn--sm btn--ghost" id="aucRefresh" aria-label="Обновить">↻</button>
+        </div>
+
+        <div class="auc-lot-tabs hidden" id="aucLotTabs"></div>
+
+        <div class="auc-stage panel panel--accent" id="aucStage">
+          <div class="auc-empty">Загрузка лота…</div>
+        </div>
+
+        <div class="panel" id="aucBidBox">
+          <div class="row row--between">
+            <div class="panel__title">Твоя ставка</div>
+            <div class="small muted" id="aucMinHint">—</div>
+          </div>
+          <div class="bet-input mt">
+            <input type="number" id="aucAmount" placeholder="Ставка" min="10" inputmode="numeric" />
+            <span class="hint">⭐</span>
+          </div>
+          <div class="auc-quick mt" id="aucQuick"></div>
+          <button class="btn btn--lg btn--block mt" id="aucBidBtn">Поставить ⭐</button>
+          <div class="small muted center mt">Перебитая ставка не возвращается — она сгорает. Победитель забирает подарок, его ставка уходит организатору лота.</div>
+        </div>
+
+        <div class="panel" id="aucHostBox">
+          <div class="panel__title">🎁 Свои аукционы</div>
+          <div class="panel__sub">Выставь подарок — и игроки начнут ставить. Завершить или отменить лот может только его организатор.</div>
+          <div class="auc-form mt">
+            <label class="field" for="aucTitle">Подарок</label>
+            <input type="text" id="aucTitle" maxlength="48" placeholder="Например, телефон" />
+            <label class="field" for="aucNote">Описание</label>
+            <input type="text" id="aucNote" maxlength="160" placeholder="Необязательно" />
+            <div class="auc-form__row">
+              <div>
+                <label class="field" for="aucEmoji">Иконка</label>
+                <input type="text" id="aucEmoji" maxlength="8" value="🎁" />
+              </div>
+              <div>
+                <label class="field" for="aucMinutes">Минуты</label>
+                <input type="number" id="aucMinutes" min="1" max="1440" value="5" />
+              </div>
+            </div>
+            <div class="auc-form__row">
+              <div>
+                <label class="field" for="aucMinBid">Старт, ⭐</label>
+                <input type="number" id="aucMinBid" min="10" value="100" />
+              </div>
+              <div>
+                <label class="field" for="aucStep">Шаг, ⭐</label>
+                <input type="number" id="aucStep" min="1" value="50" />
+              </div>
+            </div>
+            <button class="btn btn--gold btn--block mt" id="aucCreateBtn">Выставить подарок</button>
+            <div class="auc-host-actions mt">
+              <button class="btn btn--sm" id="aucFinishBtn">Завершить</button>
+              <button class="btn btn--sm btn--ghost" id="aucCancelBtn">Отменить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="aucBidsBox">
+          <div class="row row--between">
+            <div class="panel__title">Ставки</div>
+            <div class="small muted" id="aucBurned">Сгорело: 0 ⭐</div>
+          </div>
+          <div class="auc-bids mt" id="aucBids"><div class="small muted">Пока нет ставок.</div></div>
+        </div>
+
+        <div class="panel" id="aucHistoryBox">
+          <div class="panel__title">Завершённые лоты</div>
+          <div class="auc-history mt" id="aucHistory"><div class="small muted">История появится после первого аукциона.</div></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ VIP / УРОВНИ ══════════════ -->
+      <section class="screen" id="screen-vip" data-screen="vip">
+        <div class="screen-head">
+          <div>
+            <div class="screen-head__title">VIP статус</div>
+            <div class="screen-head__meta">5 уровней · привилегии</div>
+          </div>
+          <button class="btn btn--sm btn--ghost" data-go="profile">Профиль</button>
+        </div>
+        <div class="panel panel--accent">
+          <div class="row row--between"><div><div class="label">Твой оборот</div><div style="font-size:28px;font-weight:800;letter-spacing:-.04em" id="vipWagered">0</div></div><div class="vip-badge" id="vipHeroBadge">LV 1</div></div>
+          <div class="vip-bar mt"><span id="vipHeroBar" style="width:0%"></span></div>
+          <div class="small muted mt" id="vipHeroNext">—</div>
+        </div>
+        <div class="tier-list" id="vipTiers"></div>
+      </section>
+
+      <!-- ══════════════ ИСТОРИЯ / FAIR ══════════════ -->
+      <section class="screen" id="screen-history" data-screen="history">
+        <div class="screen-head">
+          <div>
+            <div class="screen-head__title">История</div>
+            <div class="screen-head__meta">ставки · честность</div>
+          </div>
+          <button class="btn btn--icon btn--ghost" data-ui="refresh" aria-label="Обновить"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5"><use href="#ic_refresh" /></svg></button>
+        </div>
+
+        <div class="fair-card">
+          <div class="row row--between"><span class="label">Provably fair</span><span class="badge on">HMAC-SHA256</span></div>
+          <div class="small muted mt">Хеш раунда публикуется до старта, сид — после. Точка краша = HMAC(сид, номер раунда).</div>
+          <div class="label mt">Hash раунда</div><div class="fair-code" id="fairHash">—</div>
+          <div class="label mt">Server seed</div><div class="fair-code" id="fairSeed">—</div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb"><span class="label">Последние ставки</span><span class="small muted" id="histCount"></span></div>
+          <div class="history-list" id="histList"><div class="small muted">Загрузка…</div></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ DEV (скрытый) ══════════════ -->
+      <section class="screen" id="screen-dev" data-screen="dev">
+        <div class="screen-head">
+          <div>
+            <div class="screen-head__title">Dev panel</div>
+            <div class="screen-head__meta">только для хозяина</div>
+          </div>
+          <button class="btn btn--sm btn--ghost" data-go="home">Выйти</button>
+        </div>
+        <div class="dev-banner"><b>PEER-ONLY MODE.</b> <span class="small muted">Переключатели влияют только на локальный UI. Реальный баланс и исходы не меняются.</span></div>
+
+        <div class="panel">
+          <div class="label mb">Feature flags / A-B</div>
+          <div class="dev-grid" id="devFlags"></div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Mock-баланс (визуальный)</div>
+          <div class="row" style="gap:6px">
+            <button class="chip-btn" data-dev-mock="+1000">+1000</button>
+            <button class="chip-btn" data-dev-mock="-1000">−1000</button>
+            <button class="chip-btn" data-dev-mock="set">SET</button>
+            <button class="chip-btn" data-dev-mock="0">0</button>
+          </div>
+          <div class="small muted mt" id="devMockValue">mock: 0 ⭐</div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Форсированные исходы (превью)</div>
+          <div class="dev-grid" id="devOutcomes"></div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Редактор crash-кривой</div>
+          <canvas class="dev-curve" id="devCurve" width="640" height="240"></canvas>
+          <div class="row mt" style="gap:6px"><button class="chip-btn" data-dev-curve="flat">ровная</button><button class="chip-btn" data-dev-curve="steep">крутая</button><button class="chip-btn" data-dev-curve="late">поздняя</button></div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">RTP-симулятор</div>
+          <div class="row" style="gap:6px"><input type="number" id="devRtpSpins" value="1000" min="10" /><button class="chip-btn" id="devRtpRun">Рассчитать</button></div>
+          <div class="small muted mt" id="devRtpOut">ожидайте результат…</div>
+        </div>
+
+        <div class="panel">
+          <div class="label mb">Motion / сеть / доступность</div>
+          <div class="dev-grid" id="devToggles"></div>
+          <div class="small muted mt" id="devA11y">контраст: проверка · тап-таргеты: 44px min</div>
+        </div>
+
+        <div class="panel">
+          <div class="row row--between mb"><span class="label">Логи событий</span><button class="btn btn--sm btn--ghost" id="devExport">Экспорт JSON</button></div>
+          <div class="dev-log" id="devLog"></div>
+          <div class="row mt" style="gap:6px;flex-wrap:wrap">
+            <button class="chip-btn" data-dev-reset="onboarding">сброс онбординга</button>
+            <button class="chip-btn" data-dev-reset="kyc">сброс KYC</button>
+            <button class="chip-btn" data-dev-locale="ru">RU</button>
+            <button class="chip-btn" data-dev-locale="en">EN</button>
+            <button class="chip-btn" data-dev-push>push-тест</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ХОСТ ══════════════ -->
+      <section class="screen" id="screen-admin" data-screen="admin">
+        <div class="row row--between mb">
+          <div class="brand__name" style="font-size:14px">👑 ПАНЕЛЬ ХОЗЯИНА</div>
+          <button class="btn btn--sm btn--ghost" id="adminRefresh">↻</button>
+        </div>
+
+        <div class="admin-tabs" id="adminTabs">
+          <button class="chip-btn active" data-admin-tab="overview">Обзор</button>
+          <button class="chip-btn" data-admin-tab="deposits">Пополнения</button>
+          <button class="chip-btn" data-admin-tab="withdrawals">Выводы</button>
+          <button class="chip-btn" data-admin-tab="players">Игроки</button>
+          <button class="chip-btn" data-admin-tab="settings">Настройки</button>
+          <button class="chip-btn" data-admin-tab="promos">Промокоды</button>
+          <button class="chip-btn" data-admin-tab="broadcast">Рассылка</button>
+        </div>
+
+        <div id="adminOverview"><div class="skeleton" style="height:220px"></div></div>
+        <div id="adminDeposits" class="hidden"></div>
+        <div id="adminWithdrawals" class="hidden"></div>
+        <div id="adminPlayers" class="hidden"></div>
+        <div id="adminSettings" class="hidden"></div>
+        <div id="adminPromos" class="hidden"></div>
+        <div id="adminBroadcast" class="hidden"></div>
+      </section>
+    </main>
+
+    <nav class="tabbar" id="tabbar">
+      <button class="tab active" data-go="home"><span class="tab__icon"><svg viewBox="0 0 24 24"><use href="#ic_games" /></svg></span>Игры</button>
+      <button class="tab" data-go="auction"><span class="tab__icon"><svg viewBox="0 0 24 24"><use href="#ic_gift" /></svg></span>Аукцион</button>
+      <button class="tab" data-go="wallet"><span class="tab__icon"><svg viewBox="0 0 24 24"><use href="#ic_wallet" /></svg></span>Кошелёк</button>
+      <button class="tab" data-go="tasks"><span class="tab__icon"><svg viewBox="0 0 24 24"><use href="#ic_tasks" /></svg></span>Задания</button>
+      <button class="tab" data-go="top"><span class="tab__icon"><svg viewBox="0 0 24 24"><use href="#ic_top" /></svg></span>Топ</button>
+      <button class="tab" data-go="profile"><span class="tab__icon"><svg viewBox="0 0 24 24"><use href="#ic_profile" /></svg></span>Профиль</button>
+      <button class="tab hidden" data-go="admin" id="tabAdmin"><span class="tab__icon"><svg viewBox="0 0 24 24"><use href="#ic_shield" /></svg></span>Хост</button>
+    </nav>
+
+    <div id="toasts"></div>
+    <div id="modalRoot"></div>
+  </div>
+
+  <!-- ══ SVG-спрайт: 24px, stroke 1.5, единая геометрия, без текста в артах ══ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="artBrass" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#EDF3FF"/><stop offset=".55" stop-color="#38E1FF"/><stop offset="1" stop-color="#18273F"/>
+      </linearGradient>
+      <linearGradient id="artObsidian" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#18273F"/><stop offset="1" stop-color="#050912"/>
+      </linearGradient>
+      <linearGradient id="artIvory" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#EDF3FF"/><stop offset="1" stop-color="#FFC76A"/>
+      </linearGradient>
+      <radialGradient id="artGlow" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#38E1FF" stop-opacity=".35"/><stop offset="1" stop-color="#38E1FF" stop-opacity="0"/>
+      </radialGradient>
+      <symbol id="ic_games" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+      <symbol id="ic_wallet" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path d="M16 14.5h2"/></symbol>
+      <symbol id="ic_tasks" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+      <symbol id="ic_top" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/><path d="M12 14v4M8 21h8M9 18h6"/></symbol>
+      <symbol id="ic_profile" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+      <symbol id="ic_bolt" viewBox="0 0 24 24"><path d="M13 2 5 13h6l-1 9 8-12h-6l1-8Z"/></symbol>
+      <symbol id="ic_game_crash" viewBox="0 0 24 24"><path d="M4 19 20 5M14 5h6v6"/><path d="M4 15l4-4 3 3 4-5"/></symbol>
+      <symbol id="ic_game_roulette" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v6M21 12h-6M12 21v-6M3 12h6"/></symbol>
+      <symbol id="ic_game_dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1"/><circle cx="15.5" cy="15.5" r="1"/><circle cx="12" cy="12" r="1"/></symbol>
+      <symbol id="ic_game_blackjack" viewBox="0 0 24 24"><rect x="7" y="3" width="12" height="16" rx="2.5"/><path d="M7 7H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10"/></symbol>
+      <symbol id="ic_game_wheel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v7M21 12h-7M12 21v-7M3 12h7M5.7 5.7l5 5M18.3 18.3l-5-5M18.3 5.7l-5 5M5.7 18.3l5-5"/></symbol>
+      <symbol id="ic_game_plinko" viewBox="0 0 24 24"><path d="M12 3 3 20h18L12 3Z"/><circle cx="9" cy="10" r=".8"/><circle cx="15" cy="10" r=".8"/><circle cx="7" cy="15" r=".8"/><circle cx="12" cy="15" r=".8"/><circle cx="17" cy="15" r=".8"/></symbol>
+      <symbol id="ic_game_coinflip" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.5 12h17"/><circle cx="12" cy="8" r="1.2"/><path d="M9.5 16h5"/></symbol>
+      <symbol id="ic_coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h4.5a1.8 1.8 0 0 1 0 3.6H10a1.8 1.8 0 0 0 0 3.4h5"/></symbol>
+      <symbol id="ic_cashout" viewBox="0 0 24 24"><path d="M5 19 19 5M10 5h9v9"/></symbol>
+      <symbol id="ic_history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/></symbol>
+      <symbol id="ic_shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.5 3 7.7 7.5 9.5 4.5-1.8 7.5-5 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="ic_copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+      <symbol id="ic_support" viewBox="0 0 24 24"><path d="M4 13v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19a3 3 0 0 1-3 2h-3"/></symbol>
+      <symbol id="ic_gift" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M3 13h18M12 9v11"/><path d="M12 9C9 9 7 8 7 6a2 2 0 0 1 4-1 2 2 0 0 1 1 4ZM12 9c3 0 5-1 5-3a2 2 0 0 0-4-1 2 2 0 0 0-1 4Z"/></symbol>
+      <symbol id="ic_refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></symbol>
+      <symbol id="ic_chart" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="m7 15 4-5 3 2 5-7"/></symbol>
+      <symbol id="ic_lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+      <symbol id="ic_alert" viewBox="0 0 24 24"><path d="M12 4 2.5 20h19L12 4Z"/><path d="M12 10v4M12 17h.01"/></symbol>
+      <symbol id="ic_users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M15.5 19a5 5 0 0 1 5.5-4.7"/></symbol>
+      <symbol id="ic_ticket" viewBox="0 0 24 24"><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6Z"/><path d="M13 5v14" stroke-dasharray="2 2"/></symbol>
+
+      <!-- ── Оригинальная клубная графика: один свет, один ракурс ── -->
+      <symbol id="art_crash" viewBox="0 0 200 120">
+        <rect width="200" height="120" fill="#050912"/>
+        <circle cx="100" cy="58" r="46" fill="url(#artGlow)" opacity=".5"/>
+        <ellipse cx="100" cy="102" rx="52" ry="8" fill="#050912" opacity=".7"/>
+        <g fill="none" stroke="#FFC76A" opacity=".25">
+          <ellipse cx="100" cy="80" rx="72" ry="18"/>
+          <ellipse cx="100" cy="64" rx="52" ry="13"/>
+          <ellipse cx="100" cy="48" rx="32" ry="8"/>
+        </g>
+        <g fill="#EDF3FF" opacity=".45">
+          <circle cx="34" cy="28" r="1.2"/><circle cx="62" cy="18" r="1"/><circle cx="148" cy="24" r="1.4"/>
+          <circle cx="168" cy="52" r="1"/><circle cx="42" cy="62" r="1"/><circle cx="156" cy="84" r="1.2"/>
+        </g>
+        <path d="M58 88 126 34l14 12-54 56-18-4-10-10Z" fill="url(#artObsidian)" stroke="#FFC76A" stroke-width="1.5"/>
+        <path d="M126 34 152 24l-12 22-14-12Z" fill="#FFC76A" opacity=".9"/>
+        <path d="M58 88 40 104l24-4 12-8-18-4Z" fill="#FFC76A" opacity=".55"/>
+        <path d="M62 82 110 42" stroke="#FFC76A" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+        <path d="M46 98c-8 4-14 6-22 7" stroke="#FFC76A" stroke-width="2" stroke-linecap="round" opacity=".45"/>
+      </symbol>
+      <symbol id="art_blackjack" viewBox="0 0 200 120">
+        <rect width="200" height="120" fill="#050912"/>
+        <ellipse cx="100" cy="96" rx="70" ry="14" fill="#121F35" stroke="#FFC76A" stroke-opacity=".3"/>
+        <path d="M32 96c8-24 34-36 68-36s60 12 68 36" fill="none" stroke="#FFC76A" stroke-opacity=".22"/>
+        <g transform="rotate(-10 78 62)">
+          <rect x="54" y="28" width="48" height="66" rx="6" fill="url(#artIvory)" stroke="#18273F"/>
+          <path d="M78 48l7 12-7 12-7-12 7-12Z" fill="#18273F"/>
+          <path d="M72 78h12" stroke="#18273F" stroke-width="2"/>
+        </g>
+        <g transform="rotate(8 124 66)">
+          <rect x="100" y="32" width="48" height="66" rx="6" fill="url(#artIvory)" stroke="#18273F"/>
+          <path d="M124 52l8 14-8 14-8-14 8-14Z" fill="#18273F"/>
+          <path d="M118 82h12" stroke="#18273F" stroke-width="2"/>
+        </g>
+        <g>
+          <ellipse cx="46" cy="96" rx="14" ry="5" fill="#18273F" stroke="#FFC76A" stroke-opacity=".4"/>
+          <ellipse cx="46" cy="92" rx="14" ry="5" fill="#18273F" stroke="#FFC76A" stroke-opacity=".4"/>
+          <ellipse cx="46" cy="88" rx="14" ry="5" fill="#18273F" stroke="#EDF3FF" stroke-opacity=".5"/>
+        </g>
+        <rect x="158" y="42" width="18" height="34" rx="4" fill="#18273F" stroke="#FFC76A" stroke-opacity=".5"/>
+      </symbol>
+      <symbol id="art_roulette" viewBox="0 0 200 120">
+        <rect width="200" height="120" fill="#050912"/>
+        <ellipse cx="100" cy="100" rx="56" ry="9" fill="#050912" opacity=".8"/>
+        <circle cx="100" cy="58" r="48" fill="#0B1424" stroke="#18273F" stroke-width="3"/>
+        <g fill="#18273F">
+          <path d="M100 58 100 14A44 44 0 0 1 131 27Z"/>
+          <path d="M100 58 100 14A44 44 0 0 1 131 27Z" transform="rotate(90 100 58)"/>
+          <path d="M100 58 100 14A44 44 0 0 1 131 27Z" transform="rotate(180 100 58)"/>
+          <path d="M100 58 100 14A44 44 0 0 1 131 27Z" transform="rotate(270 100 58)"/>
+        </g>
+        <g stroke="#FFC76A" stroke-opacity=".35">
+          <path d="M100 58 100 14M100 58 131 27M100 58 144 58M100 58 131 89M100 58 100 102M100 58 69 89M100 58 56 58M100 58 69 27"/>
+        </g>
+        <circle cx="100" cy="58" r="13" fill="#18273F" stroke="#FFC76A"/>
+        <circle cx="100" cy="58" r="4" fill="#FFC76A"/>
+        <circle cx="128" cy="30" r="4" fill="url(#artIvory)" stroke="#18273F"/>
+      </symbol>
+      <symbol id="art_wheel" viewBox="0 0 200 120">
+        <rect width="200" height="120" fill="#050912"/>
+        <ellipse cx="100" cy="106" rx="50" ry="8" fill="#050912" opacity=".8"/>
+        <circle cx="100" cy="66" r="46" fill="#0B1424" stroke="#18273F" stroke-width="3"/>
+        <g fill="#18273F">
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z"/>
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z" transform="rotate(90 100 66)"/>
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z" transform="rotate(180 100 66)"/>
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z" transform="rotate(270 100 66)"/>
+        </g>
+        <g fill="#18273F" opacity=".85">
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z" transform="rotate(45 100 66)"/>
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z" transform="rotate(135 100 66)"/>
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z" transform="rotate(225 100 66)"/>
+          <path d="M100 66 100 24A42 42 0 0 1 130 36Z" transform="rotate(315 100 66)"/>
+        </g>
+        <g stroke="#FFC76A" stroke-opacity=".4">
+          <path d="M100 66 100 24M100 66 130 36M100 66 142 66M100 66 130 96M100 66 100 108M100 66 70 96M100 66 58 66M100 66 70 36"/>
+        </g>
+        <circle cx="100" cy="66" r="12" fill="#18273F" stroke="#FFC76A"/>
+        <circle cx="100" cy="66" r="4" fill="#FFC76A"/>
+        <path d="M100 10l8 14H92Z" fill="#FFC76A"/>
+        <g fill="#FFC76A" opacity=".55">
+          <circle cx="100" cy="20" r="1.4"/><circle cx="136" cy="30" r="1.4"/><circle cx="146" cy="66" r="1.4"/>
+          <circle cx="136" cy="102" r="1.4"/><circle cx="64" cy="102" r="1.4"/><circle cx="54" cy="66" r="1.4"/><circle cx="64" cy="30" r="1.4"/>
+        </g>
+      </symbol>
+      <symbol id="art_plinko" viewBox="0 0 200 120">
+        <rect width="200" height="120" fill="#050912"/>
+        <rect x="42" y="10" width="116" height="100" rx="10" fill="#0B1424" stroke="#FFC76A" stroke-opacity=".25"/>
+        <g fill="#FFC76A">
+          <circle cx="100" cy="28" r="2.2"/>
+          <circle cx="88" cy="42" r="2.2"/><circle cx="112" cy="42" r="2.2"/>
+          <circle cx="76" cy="56" r="2.2"/><circle cx="100" cy="56" r="2.2"/><circle cx="124" cy="56" r="2.2"/>
+          <circle cx="64" cy="70" r="2.2"/><circle cx="88" cy="70" r="2.2"/><circle cx="112" cy="70" r="2.2"/><circle cx="136" cy="70" r="2.2"/>
+          <circle cx="76" cy="84" r="2.2"/><circle cx="100" cy="84" r="2.2"/><circle cx="124" cy="84" r="2.2"/>
+        </g>
+        <path d="M100 14v12" stroke="#FFC76A" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+        <circle cx="100" cy="32" r="4" fill="url(#artIvory)" stroke="#18273F"/>
+        <g stroke="#FFC76A" stroke-opacity=".3">
+          <rect x="52" y="94" width="18" height="9" rx="2" fill="#18273F"/>
+          <rect x="72" y="94" width="18" height="9" rx="2" fill="#18273F"/>
+          <rect x="92" y="94" width="18" height="9" rx="2" fill="#18273F"/>
+          <rect x="112" y="94" width="18" height="9" rx="2" fill="#18273F"/>
+          <rect x="132" y="94" width="18" height="9" rx="2" fill="#18273F"/>
+        </g>
+      </symbol>
+      <symbol id="art_dice" viewBox="0 0 200 120">
+        <rect width="200" height="120" fill="#050912"/>
+        <ellipse cx="100" cy="98" rx="58" ry="10" fill="#050912" opacity=".8"/>
+        <g transform="rotate(-12 72 58)">
+          <rect x="42" y="28" width="60" height="60" rx="14" fill="url(#artObsidian)" stroke="#18273F" stroke-width="2"/>
+          <g fill="#FFC76A">
+            <circle cx="58" cy="44" r="4"/><circle cx="86" cy="44" r="4"/><circle cx="72" cy="58" r="4"/>
+            <circle cx="58" cy="72" r="4"/><circle cx="86" cy="72" r="4"/>
+          </g>
+        </g>
+        <g transform="rotate(14 132 62)">
+          <rect x="102" y="32" width="60" height="60" rx="14" fill="url(#artObsidian)" stroke="#18273F" stroke-width="2"/>
+          <g fill="#FFC76A">
+            <circle cx="118" cy="48" r="4"/><circle cx="132" cy="62" r="4"/><circle cx="146" cy="76" r="4"/>
+          </g>
+        </g>
+      </symbol>
+      <symbol id="art_coinflip" viewBox="0 0 200 120">
+        <rect width="200" height="120" fill="#050912"/>
+        <ellipse cx="100" cy="100" rx="46" ry="8" fill="#050912" opacity=".8"/>
+        <g transform="rotate(-8 100 58)">
+          <ellipse cx="100" cy="62" rx="36" ry="36" fill="#18273F"/>
+          <ellipse cx="100" cy="58" rx="34" ry="34" fill="url(#artIvory)" stroke="#18273F" stroke-width="2"/>
+          <ellipse cx="100" cy="58" rx="26" ry="26" fill="none" stroke="#18273F" stroke-opacity=".5"/>
+          <path d="M100 38l6 14 14 1-11 9 3 14-12-7-12 7 3-14-11-9 14-1 6-14Z" fill="#18273F" opacity=".85"/>
+        </g>
+        <g transform="translate(130 30) rotate(18)">
+          <ellipse cx="0" cy="0" rx="18" ry="18" fill="#18273F"/>
+          <ellipse cx="0" cy="-2" rx="16" ry="16" fill="#18273F" stroke="#FFC76A" stroke-opacity=".6"/>
+          <path d="M0-9l2 6 6 1-5 4 1 6-4-3-4 3 1-6-5-4 6-1 2-6Z" fill="#FFC76A" opacity=".8"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ══ SPLASH + ONBOARDING (3 шага, без длинных текстов) ══ -->
+  <div id="onboarding" role="dialog" aria-modal="true" aria-label="Добро пожаловать">
+    <div class="ob-inner">
+      <div class="ob-logo">
+        <div class="ob-mark">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="12" y="12" width="96" height="96" rx="28" fill="#0B1424" stroke="rgba(56,225,255,.45)"/>
+            <rect x="22" y="22" width="76" height="76" rx="21" fill="none" stroke="rgba(56,225,255,.14)"/>
+            <path d="M60 30v7M60 83v7M30 60h7M83 60h7" stroke="rgba(56,225,255,.4)" stroke-width="1.5"/>
+            <text x="60" y="72" text-anchor="middle" font-family="Unbounded, Inter, sans-serif" font-size="40" font-weight="800" fill="#FFC76A" letter-spacing="-2">G</text>
+          </svg>
+        </div>
+        <div class="ob-wordmark">GGDROP</div>
+        <div class="ob-sub">private club</div>
+      </div>
+      <div class="ob-art" id="obArt"></div>
+      <h2 class="ob-title" id="obTitle">ПРИВАТНЫЙ КЛУБ</h2>
+      <p class="ob-text" id="obText">Семь столов, звёздные ставки и выплаты на баланс.</p>
+      <div class="ob-dots" id="obDots"><span class="ob-dot on"></span><span class="ob-dot"></span><span class="ob-dot"></span></div>
+      <div class="ob-actions">
+        <button class="btn btn--lg btn--block" id="obNext">Далее</button>
+        <button class="ob-skip" id="obSkip">Пропустить</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="webapp.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
