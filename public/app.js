@@ -361,8 +361,8 @@ function renderProfile() {
   if ($('friendsCount')) $('friendsCount').textContent = fmt(u.refCount || 0);
   renderVip(u);
 
-  $('statVault').textContent = money(u.vault || 0);
-  $('statFeePaid').textContent = money(u.feePaid || 0);
+  $('statVault').textContent = money(u.reserved || 0);
+  $('statFeePaid').textContent = money(u.withdrawFeePaid || 0);
   $('walletHint').textContent = u.reserved
     ? `В аукционах в резерве: ${money(u.reserved)} ⭐ · сгорает только проигрыш`
     : 'Без потолка баланса · все деньги доступны';
