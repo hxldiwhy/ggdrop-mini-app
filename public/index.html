@@ -483,7 +483,7 @@
             <span class="small muted">Мой баланс</span>
             <div><b class="gold" id="heroBalanceValue">0</b><span class="coin">⭐</span></div>
           </div>
-          <div class="profile-hero__sub" id="heroVaultLine">В банке: 0 ⭐</div>
+          <div class="profile-hero__sub" id="heroVaultLine">Потолок снят · баланс без ограничений</div>
           <div class="profile-hero__actions">
             <button class="btn btn--sm" data-go="withdraw"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_cashout" /></svg>Вывод</button>
             <button class="btn btn--sm btn--ghost" id="profileTopupHero"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic_coin" /></svg>Пополнить</button>
@@ -551,15 +551,15 @@
         <div class="panel" id="walletPanel">
           <div class="row row--between">
             <div>
-              <div class="panel__title" style="font-size:13px">🏦 Кошелёк и лимит</div>
-              <div class="panel__sub" id="walletHint">Потолок баланса 150 000 ⭐</div>
+              <div class="panel__title" style="font-size:13px">🏦 Кошелёк и вывод</div>
+              <div class="panel__sub" id="walletHint">Без потолка баланса · вывод с комиссией 13%</div>
             </div>
             <button class="btn btn--sm btn--ghost" data-go="withdraw">Вывод</button>
           </div>
           <div class="wallet-bar mt"><span id="walletBar"></span></div>
-          <div class="kv mt"><span class="kv__k">В банке</span><span class="kv__v gold" id="statVault">0</span></div>
-          <div class="kv"><span class="kv__k">Комиссия за хранение</span><span class="kv__v" id="statFee">—</span></div>
-          <div class="kv"><span class="kv__k">Уплачено комиссий</span><span class="kv__v" id="statFeePaid">0</span></div>
+          <div class="kv mt"><span class="kv__k">В резерве аукционов</span><span class="kv__v gold" id="statVault">0</span></div>
+          <div class="kv"><span class="kv__k">Комиссия при выводе</span><span class="kv__v" id="statFee">—</span></div>
+          <div class="kv"><span class="kv__k">Удержано за выводы</span><span class="kv__v" id="statFeePaid">0</span></div>
           <div class="small muted mt" id="feeHint"></div>
         </div>
 
@@ -626,7 +626,7 @@
         <div class="wallet-hero">
           <div class="label">Доступно на балансе</div>
           <div class="wallet-hero__amount" data-balance>0</div>
-          <div class="wallet-hero__sub" id="walletVault">В банке: 0 ⭐</div>
+          <div class="wallet-hero__sub" id="walletVault">Потолок снят · баланс без ограничений</div>
         </div>
 
         <div class="quick-grid">
@@ -644,9 +644,9 @@
         </div>
 
         <div class="panel">
-          <div class="label mb">Лимит баланса и комиссия</div>
-          <div class="kv"><span class="kv__k">Потолок баланса</span><span class="kv__v" id="walletCap">150 000 ⭐</span></div>
-          <div class="kv"><span class="kv__k">Комиссия хранения</span><span class="kv__v" id="walletFee">—</span></div>
+          <div class="label mb">Баланс и комиссия</div>
+          <div class="kv"><span class="kv__k">Потолок баланса</span><span class="kv__v" id="walletCap">без потолка</span></div>
+          <div class="kv"><span class="kv__k">Комиссия вывода</span><span class="kv__v" id="walletFee">—</span></div>
           <div class="kv"><span class="kv__k">Вывод за заявку</span><span class="kv__v" id="walletWithdraw">—</span></div>
         </div>
 
