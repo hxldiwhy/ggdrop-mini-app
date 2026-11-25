@@ -15,7 +15,7 @@ function loadSecret() {
     fs.mkdirSync(path.dirname(CONFIG.secretFile), { recursive: true });
     fs.writeFileSync(CONFIG.secretFile, secret, { mode: 0o600 });
   } catch (err) {
-    console.error('[auth] РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ СЃРµРєСЂРµС‚:', err.message);
+    console.error('[auth] Не удалось сохранить секрет:', err.message);
   }
   return secret;
 }
@@ -29,9 +29,9 @@ export function hmac(data, key = SECRET) {
   return crypto.createHmac('sha256', key).update(data).digest();
 }
 
-/** РџРѕРґРїРёСЃР°РЅРЅС‹Р№ С‚РѕРєРµРЅ РІС…РѕРґР° РІ РјРёРЅРё-РїСЂРёР»РѕР¶РµРЅРёРµ: <payload>.<sig>.
- *  sessionId вЂ” РїСЂРёРІСЏР·РєР° Рє РєРѕРЅРєСЂРµС‚РЅРѕРјСѓ Р·Р°РїСЂРѕСЃСѓ Wiftgram (query_id), С‡С‚РѕР±С‹
- *  СЃРєРѕРїРёСЂРѕРІР°РЅРЅСѓСЋ СЃСЃС‹Р»РєСѓ РЅРµР»СЊР·СЏ Р±С‹Р»Рѕ РѕС‚РєСЂС‹С‚СЊ РІ РґСЂСѓРіРѕРј РєР»РёРµРЅС‚Рµ. */
+/** Подписанный токен входа в мини-приложение: <payload>.<sig>.
+ *  sessionId — привязка к конкретному запросу Wiftgram (query_id), чтобы
+ *  скопированную ссылку нельзя было открыть в другом клиенте. */
 export function signToken(userId, ttlMs = 12 * 60 * 60 * 1000, sessionId = '', via = '') {
   const payload = b64(JSON.stringify({
     u: Number(userId),
@@ -67,8 +67,8 @@ export function verifyToken(token) {
   }
 }
 
-/** РџСЂРѕРІРµСЂРєР° Telegram/Wiftgram initData (Р°Р»РіРѕСЂРёС‚Рј РєР°Рє РІ Telegram WebApp).
- *  Р’РѕР·РІСЂР°С‰Р°РµС‚ userId + РјРµС‚Р°РґР°РЅРЅС‹Рµ client-СЃРµСЃСЃРёРё. maxAgeMs > 0 вЂ” РѕС‚Р±СЂРѕСЃРёС‚СЊ СЃС‚Р°СЂС‹Рµ РґР°РЅРЅС‹Рµ. */
+/** Проверка Telegram/Wiftgram initData (алгоритм как в Telegram WebApp).
+ *  Возвращает userId + метаданные client-сессии. maxAgeMs > 0 — отбросить старые данные. */
 export function parseInitData(initData, botToken = CONFIG.token, maxAgeMs = 0) {
   if (!initData || typeof initData !== 'string') return null;
   const params = new URLSearchParams(initData);
@@ -99,12 +99,12 @@ export function parseInitData(initData, botToken = CONFIG.token, maxAgeMs = 0) {
   };
 }
 
-/** РћР±СЂР°С‚РЅР°СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚СЊ: РїСЂРѕСЃС‚Рѕ РїСЂРѕРІРµСЂРµРЅРЅС‹Р№ РѕР±СЉРµРєС‚ user. */
+/** Обратная совместимость: просто проверенный объект user. */
 export function validateInitData(initData, botToken = CONFIG.token) {
   return parseInitData(initData, botToken)?.user || null;
 }
 
-/** Р“РµРЅРµСЂР°С†РёСЏ СЃСЃС‹Р»РєРё РЅР° РјРёРЅРё-РїСЂРёР»РѕР¶РµРЅРёРµ РґР»СЏ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ. */
+/** Генерация ссылки на мини-приложение для конкретного пользователя. */
 export function miniAppUrl(base, userId, pathSuffix = 'app') {
   if (!base) return '';
   const clean = base.replace(/\/+$/, '');
