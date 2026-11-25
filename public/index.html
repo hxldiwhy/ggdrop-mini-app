@@ -406,12 +406,10 @@
                 <option value="16">16</option>
               </select>
             </div>
-            <div style="flex:1.4">
+            <div style="flex:1">
               <label class="field" style="margin-top:0">Риск</label>
               <div class="row" style="gap:5px">
-                <button class="chip-btn active" data-risk="low" style="flex:1;padding:9px 4px;font-size:11.5px">Низкий</button>
-                <button class="chip-btn" data-risk="medium" style="flex:1;padding:9px 4px;font-size:11.5px">Средний</button>
-                <button class="chip-btn" data-risk="high" style="flex:1;padding:9px 4px;font-size:11.5px">Высокий</button>
+                <button class="chip-btn active" data-risk="high" style="flex:1;min-height:44px;padding:9px 4px;font-size:11.5px">Высокий</button>
               </div>
             </div>
           </div>
@@ -419,10 +417,11 @@
             <span class="field plinko-count-row__label">Шарики</span>
             <div class="plinko-count" id="plinkoBalls">
               <button class="chip-btn active" data-plinko-balls="1">1</button>
-              <button class="chip-btn" data-plinko-balls="2">2</button>
-              <button class="chip-btn" data-plinko-balls="3">3</button>
-              <button class="chip-btn" data-plinko-balls="5">5</button>
               <button class="chip-btn" data-plinko-balls="10">10</button>
+              <button class="chip-btn" data-plinko-balls="25">25</button>
+              <button class="chip-btn" data-plinko-balls="50">50</button>
+              <button class="chip-btn" data-plinko-balls="100">100</button>
+              <input class="plinko-count__input" id="plinkoBallsInput" type="number" min="1" max="100" value="1" inputmode="numeric" aria-label="Количество шариков" />
             </div>
           </div>
           <div class="bet-input mt">
