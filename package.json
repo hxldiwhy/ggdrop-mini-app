@@ -1,0 +1,21 @@
+{
+  "name": "wiftgram-casino",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Casino bot for Wiftgram with a built-in mini app (host/owner panel included)",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test test/",
+    "tunnel": "powershell -ExecutionPolicy Bypass -File scripts/tunnel.ps1",
+    "cert": "powershell -ExecutionPolicy Bypass -File scripts/make-cert.ps1"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  }
+}
