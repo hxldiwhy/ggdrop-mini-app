@@ -67,14 +67,14 @@ test('без токена — 401', async () => {
   });
 });
 
-test('профиль и ставка в кости', async () => {
+test('профиль и ставка в колесо', async () => {
   await withServer(async ({ call, user }) => {
     const token = signToken(user.id);
     const me = await call('/api/me', { token });
     assert.equal(me.data.user.balance, 100_000);
-    const bet = await call('/api/dice/bet', { method: 'POST', token, body: { amount: 500, target: 50, over: true } });
+    const bet = await call('/api/wheel/spin', { method: 'POST', token, body: { amount: 500 } });
     assert.equal(bet.status, 200);
-    assert.ok(bet.data.roll >= 1 && bet.data.roll <= 100);
+    assert.ok(Number.isFinite(bet.data.multiplier));
     assert.equal(bet.data.user.balance, 100_000 - 500 + bet.data.payout);
   });
 });
