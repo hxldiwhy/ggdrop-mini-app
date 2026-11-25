@@ -182,7 +182,7 @@ test('колесо и плинко: списание и выплата', () => {
 test('плинко: залп из нескольких шариков и лимит на суммарную ставку', () => {
   const { engine, user } = setup();
   const before = user.balance;
-  const p = engine.dropPlinko(user.id, { amount: 100, rows: 12, risk: 'low', count: 5 });
+  const p = engine.dropPlinko(user.id, { amount: 100, rows: 12, risk: 'high', count: 5 });
   assert.equal(p.count, 5);
   assert.equal(p.totalBet, 500);
   assert.equal(p.balls.length, 5);
@@ -190,7 +190,7 @@ test('плинко: залп из нескольких шариков и лим�
   assert.equal(p.payout, p.balls.reduce((sum, b) => sum + b.payout, 0));
 
   assert.throws(
-    () => engine.dropPlinko(user.id, { amount: 6000, rows: 12, risk: 'low', count: 5 }),
+    () => engine.dropPlinko(user.id, { amount: 6000, rows: 12, risk: 'high', count: 5 }),
     errCode('BET_TOO_HIGH'),
   );
 });
