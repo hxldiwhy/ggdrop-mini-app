@@ -52,7 +52,7 @@ async function withStrictServer(fn) {
   }
 }
 
-test('строгий вход: ссылка без initData не принимается', async () => {
+test('СЃС‚СЂРѕРіРёР№ РІС…РѕРґ: СЃСЃС‹Р»РєР° Р±РµР· initData РЅРµ РїСЂРёРЅРёРјР°РµС‚СЃСЏ', async () => {
   await withStrictServer(async ({ call, user }) => {
     const r = await call('/api/session', { method: 'POST', body: { t: signToken(user.id) } });
     assert.equal(r.status, 401);
@@ -60,7 +60,7 @@ test('строгий вход: ссылка без initData не принима�
   });
 });
 
-test('строгий вход: чужой initData не подходит к чужой ссылке', async () => {
+test('СЃС‚СЂРѕРіРёР№ РІС…РѕРґ: С‡СѓР¶РѕР№ initData РЅРµ РїРѕРґС…РѕРґРёС‚ Рє С‡СѓР¶РѕР№ СЃСЃС‹Р»РєРµ', async () => {
   await withStrictServer(async ({ call, user }) => {
     const r = await call('/api/session', {
       method: 'POST',
@@ -71,7 +71,7 @@ test('строгий вход: чужой initData не подходит к чу
   });
 });
 
-test('строгий вход: свои initData + ссылка дают сессию, привязанную к query_id', async () => {
+test('СЃС‚СЂРѕРіРёР№ РІС…РѕРґ: СЃРІРѕРё initData + СЃСЃС‹Р»РєР° РґР°СЋС‚ СЃРµСЃСЃРёСЋ, РїСЂРёРІСЏР·Р°РЅРЅСѓСЋ Рє query_id', async () => {
   await withStrictServer(async ({ call, user }) => {
     const initData = makeInitData({ id: user.id, queryId: 'q_mine_7' });
     const r = await call('/api/session', { method: 'POST', body: { t: signToken(user.id), initData } });
@@ -88,7 +88,41 @@ test('строгий вход: свои initData + ссылка дают сес�
   });
 });
 
-test('потолок баланса: излишек уходит в банк и виден в профиле', async () => {
+test('СЃС‚СЂРѕРіРёР№ РІС…РѕРґ: Wiftgram Р±РµР· РїРѕРґРїРёСЃРё РїСѓСЃРєР°РµС‚ С‚РѕР»СЊРєРѕ СЃРІРѕРµРіРѕ РёРіСЂРѕРєР° РїРѕ РєРЅРѕРїРєРµ', async () => {
+  await withStrictServer(async ({ call, user }) => {
+    const login = signToken(user.id);
+    const r = await call('/api/session', {
+      method: 'POST',
+      body: { t: login, unsafe: { user: { id: user.id } } },
+    });
+    assert.equal(r.status, 200);
+    assert.ok(r.data.token);
+
+    const me = await call('/api/me', { token: r.data.token });
+    assert.equal(me.status, 200);
+    assert.equal(me.data.user.id, user.id);
+
+    const reused = await call('/api/session', {
+      method: 'POST',
+      body: { t: login, unsafe: { user: { id: user.id } } },
+    });
+    assert.equal(reused.status, 401);
+    assert.equal(reused.data.error, 'LINK_USED');
+  });
+});
+
+test('СЃС‚СЂРѕРіРёР№ РІС…РѕРґ: С‡СѓР¶РѕР№ webApp id РЅРµ РѕС‚РєСЂС‹РІР°РµС‚ С‡СѓР¶СѓСЋ РєРЅРѕРїРєСѓ', async () => {
+  await withStrictServer(async ({ call, user }) => {
+    const r = await call('/api/session', {
+      method: 'POST',
+      body: { t: signToken(user.id), unsafe: { user: { id: 9999 } } },
+    });
+    assert.equal(r.status, 401);
+    assert.equal(r.data.error, 'ACCOUNT_MISMATCH');
+  });
+});
+
+test('РїРѕС‚РѕР»РѕРє Р±Р°Р»Р°РЅСЃР°: РёР·Р»РёС€РµРє СѓС…РѕРґРёС‚ РІ Р±Р°РЅРє Рё РІРёРґРµРЅ РІ РїСЂРѕС„РёР»Рµ', async () => {
   await withStrictServer(async ({ call, store, user }) => {
     store.credit(user, 200000);
     const r = await call('/api/me', { token: signToken(user.id), initData: makeInitData({ id: user.id }) });
@@ -99,7 +133,7 @@ test('потолок баланса: излишек уходит в банк и 
   });
 });
 
-test('комиссия за хранение списывается один раз и попадает в историю', async () => {
+test('РєРѕРјРёСЃСЃРёСЏ Р·Р° С…СЂР°РЅРµРЅРёРµ СЃРїРёСЃС‹РІР°РµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· Рё РїРѕРїР°РґР°РµС‚ РІ РёСЃС‚РѕСЂРёСЋ', async () => {
   await withStrictServer(async ({ engine, store, user }) => {
     store.settings = { storageFee: { enabled: true, threshold: 100000, percentPerDay: 1, intervalMs: 1000 } };
     store.credit(user, 200000);
@@ -112,13 +146,13 @@ test('комиссия за хранение списывается один р�
   });
 });
 
-test('вывод: заявка резервирует сумму, отклонение возвращает её', async () => {
+test('РІС‹РІРѕРґ: Р·Р°СЏРІРєР° СЂРµР·РµСЂРІРёСЂСѓРµС‚ СЃСѓРјРјСѓ, РѕС‚РєР»РѕРЅРµРЅРёРµ РІРѕР·РІСЂР°С‰Р°РµС‚ РµС‘', async () => {
   await withStrictServer(async ({ engine, store, owner, user }) => {
     store.credit(user, 50000);
     const wd = engine.createWithdrawal(user.id, { amount: 10000, contact: '@crypt' });
     assert.equal(wd.status, 'pending');
     assert.equal(user.balance, 41000);
-    assert.throws(() => engine.createWithdrawal(user.id, { amount: 999999 }), /Максимальный вывод/);
+    assert.throws(() => engine.createWithdrawal(user.id, { amount: 999999 }), /РњР°РєСЃРёРјР°Р»СЊРЅС‹Р№ РІС‹РІРѕРґ/);
 
     engine.decideWithdrawal(owner.id, wd.id, false);
     assert.equal(user.balance, 51000);
