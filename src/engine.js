@@ -499,7 +499,7 @@ export class Engine extends EventEmitter {
     const balls = clampBalls(count);
     // Лимит игры применяется к суммарной ставке за весь залп, а не к одному шарику.
     const totalBet = this.assertBet(user, perBet * balls, 'plinko');
-    const r = RISKS[risk] ? risk : 'medium';
+    const r = RISKS[risk] ? risk : 'high';
     const n = [8, 10, 12, 14, 16].includes(Number(rows)) ? Number(rows) : 12;
     this.takeBet(user, totalBet);
     const res = dropBalls({
@@ -511,9 +511,10 @@ export class Engine extends EventEmitter {
       edge: this.settings.houseEdge.plinko,
     });
     const first = res.balls[0];
+    const shown = res.balls.slice(0, 20).map((b) => `x${b.multiplier}`).join(', ');
     const summary = balls === 1
       ? `x${first.multiplier}`
-      : `${balls} шариков: ${res.balls.map((b) => `x${b.multiplier}`).join(', ')}`;
+      : `${balls} шариков: ${shown}${balls > 20 ? ' …' : ''}`;
     const settled = this.settle(user, 'plinko', totalBet, res.payout, `Плинко ${n} рядов (${r}): ${summary}`, {
       bucket: first.bucket,
       balls,
