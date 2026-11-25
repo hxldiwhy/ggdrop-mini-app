@@ -55,6 +55,7 @@ export function initAuction() {
 
 let lastHistory = [];
 let lastBurned = 0;
+let lastReserved = 0;
 
 function betLimit() {
   return Math.max(0, Math.min(
@@ -89,6 +90,13 @@ function render(data) {
   lot = selectedLot();
   lastHistory = data.history || [];
   lastBurned = data.burned || 0;
+  lastReserved = Number(data.reserved || lot?.reserved || 0);
+  const reservedEl = $('aucReserved');
+  if (reservedEl) {
+    reservedEl.textContent = lastReserved > 0
+      ? `В резерве: ${fmt(lastReserved)} ⭐ — деньги не сгорели, они вернутся при отмене лота.`
+      : 'Деньги ставки лежат в резерве и не сгорают, пока ты лидируешь.';
+  }
 
   renderTabs(lots);
   renderStage(lot);
@@ -270,7 +278,7 @@ async function placeBid() {
   try {
     await api('/auction/bid', { method: 'POST', body: { lotId: lot.id, amount } });
     app.haptic?.('success');
-    toast(`Ставка ${fmt(amount)} ⭐ принята`, 'ok');
+    toast(`Ставка ${fmt(amount)} ⭐ в резерве — не сгорела`, 'ok');
     selectedId = lot.id;
     await load(false);
   } catch {
