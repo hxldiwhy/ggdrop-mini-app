@@ -22,9 +22,9 @@ export const DEFAULT_SETTINGS = {
   maxWithdraw: 150000,
   maintenance: false,
   /** Доля казино в каждой игре (0.03 = 3%) */
-  houseEdge: { roulette: 0.027, dice: 0.03, blackjack: 0.012, crash: 0.03, wheel: 0.04, plinko: 0.03, coinflip: 0.03 },
+  houseEdge: { roulette: 0.027, blackjack: 0.012, crash: 0.03, wheel: 0.04, plinko: 0.03, coinflip: 0.03 },
   /** Лимиты на одну ставку по игре */
-  limits: { roulette: 50000, dice: 25000, blackjack: 25000, crash: 25000, wheel: 25000, plinko: 25000, coinflip: 25000, auction: 25000 },
+  limits: { roulette: 50000, blackjack: 25000, crash: 25000, wheel: 25000, plinko: 25000, coinflip: 25000, auction: 25000 },
   dailyCooldownMs: 24 * 60 * 60 * 1000,
   /** Краш: время приёма ставок и паузы между раундами */
   crash: { bettingMs: 8000, cooldownMs: 5000 },
@@ -32,10 +32,10 @@ export const DEFAULT_SETTINGS = {
   newUserMaxBet: 5000,
   /** Минимальная ставка для вывода в топ */
   topBy: 'totalWin',
-  /** Потолок баланса. Всё сверху уходит в видимый «банк» игрока. */
-  maxBalance: 150000,
-  /** Явная комиссия за хранение сверх порога — игрок видит её в профиле и истории. */
-  storageFee: { enabled: true, threshold: 100000, percentPerDay: 0.5, intervalMs: 24 * 60 * 60 * 1000 },
+  /** Потолок баланса снят: 0 = без лимита. */
+  maxBalance: 0,
+  /** Хранилище отключено вместе с потолком баланса. */
+  storageFee: { enabled: false, threshold: 100000, percentPerDay: 0, intervalMs: 24 * 60 * 60 * 1000 },
   updatedAt: 0,
 };
 
@@ -51,7 +51,7 @@ const DEFAULT_DB = () => ({
   withdrawals: [],
   /** Один активный лот плюс завершённые аукционы. */
   auctions: [],
-  meta: { totalBets: 0, totalWagered: 0, totalPaid: 0, totalFees: 0, totalBurned: 0, rounds: {}, usedLoginNonces: [] },
+  meta: { totalBets: 0, totalWagered: 0, totalPaid: 0, totalFees: 0, totalBurned: 0, rounds: {}, usedLoginNonces: [], tokenDevices: {} },
 });
 
 const MAX_HISTORY = 5000;
@@ -77,13 +77,26 @@ export class Store {
         this.data.settings.limits = { ...DEFAULT_SETTINGS.limits, ...((raw.settings || {}).limits || {}) };
         this.data.settings.crash = { ...DEFAULT_SETTINGS.crash, ...((raw.settings || {}).crash || {}) };
         this.data.settings.storageFee = { ...DEFAULT_SETTINGS.storageFee, ...((raw.settings || {}).storageFee || {}) };
+        // Пользователь снял потолок баланса: старые 150000 и комиссию хранилища больше не применяем.
+        this.data.settings.maxBalance = 0;
+        this.data.settings.storageFee.enabled = false;
+        this.data.settings.storageFee.percentPerDay = 0;
+        // Лимит вывода 150000 снят: старое значение из базы больше не применяется.
+        this.data.settings.maxWithdraw = Math.max(1000000, Number(this.data.settings.maxWithdraw) || 0);
+        // Хозяин не может быть забанен — в том числе старой записью из базы.
+        const ownerId = Number(this.data.settings.ownerId || CONFIG.ownerId || 0);
+        const ownerUser = ownerId ? this.data.users?.[ownerId] : null;
+        if (ownerUser) {
+          ownerUser.banned = false;
+          ownerUser.isOwner = true;
+        }
         // Старые настройки защиты кассы больше не используются — чистим их из базы.
         delete this.data.settings.bankroll;
         delete this.data.meta.dailyPaid;
         delete this.data.meta.dailyPaidDate;
         delete this.data.meta.jackpot;
         // Удалённые игры не должны оставаться в настройках, счётчиках и истории.
-        const removedGames = new Set(['mines', 'case', 'slots']);
+        const removedGames = new Set(['mines', 'case', 'slots', 'dice']);
         for (const key of removedGames) {
           delete this.data.settings.houseEdge[key];
           delete this.data.settings.limits[key];
@@ -103,6 +116,7 @@ export class Store {
         this.data.auctions ||= [];
         this.data.meta.totalBurned ||= 0;
         this.data.meta.usedLoginNonces ||= [];
+        this.data.meta.tokenDevices ||= {};
       } else {
         fs.mkdirSync(path.dirname(this.file), { recursive: true });
         this.flushNow();
@@ -185,20 +199,13 @@ export class Store {
   user(id) { return this.data.users[Number(id)] || null; }
   users() { return Object.values(this.data.users); }
 
-  /** Жёсткий потолок баланса: лишнее не пропадает, а уходит в видимый банк игрока. */
+  /** Лимита баланса нет: бесконечность позволяет старому коду работать без ветвлений. */
   balanceCap() {
-    return Math.max(1000, Math.round(Number(this.settings.maxBalance) || 150000));
+    return Infinity;
   }
 
-  applyBalanceCap(u) {
-    if (!u) return 0;
-    const cap = this.balanceCap();
-    if (u.balance > cap) {
-      const extra = Math.round(u.balance - cap);
-      u.balance = cap;
-      u.vault = Math.round((u.vault || 0) + extra);
-      return extra;
-    }
+  /** Потолок снят, поэтому в банк больше ничего не переезжает. */
+  applyBalanceCap() {
     return 0;
   }
 
@@ -291,7 +298,7 @@ export class Store {
     const users = this.users();
     const balances = users.reduce((s, u) => s + u.balance, 0);
     const todayStart = new Date().setHours(0, 0, 0, 0);
-    const gameNames = new Set(['roulette', 'crash', 'dice', 'blackjack', 'wheel', 'plinko', 'coinflip', 'lucky', 'auction']);
+    const gameNames = new Set(['roulette', 'crash', 'blackjack', 'wheel', 'plinko', 'coinflip', 'lucky', 'auction']);
     const today = this.data.history.filter((h) => h.ts >= todayStart && gameNames.has(h.game));
     return {
       users: users.length,
@@ -321,13 +328,9 @@ export class Store {
     return true;
   }
 
+  /** Сохраняем сразу: потеря последних действий при перезапуске недопустима. */
   save() {
-    this._dirty = true;
-    if (this._timer || this._flushing) return;
-    this._timer = setTimeout(() => {
-      this._timer = null;
-      this.flushNow();
-    }, 250);
+    this.flushNow();
   }
 
   flushNow() {
