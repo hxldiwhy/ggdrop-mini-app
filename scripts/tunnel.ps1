@@ -46,18 +46,43 @@ if (-not (Test-Path $exe)) {
 $log = Join-Path $dataDir 'tunnel.log'
 if (Test-Path $log) { Remove-Item $log -Force -ErrorAction SilentlyContinue }
 
-Write-Host "Поднимаю туннель на http://localhost:$Port …"
-$cliArgs = @('tunnel', '--no-autoupdate', '--no-prechecks', '--protocol', 'http2', '--edge-ip-version', '4', '--url', "http://localhost:$Port", '--logfile', $log)
+function Test-Tunnel {
+  param([string]$Base)
+  try {
+    $res = Invoke-WebRequest -Uri "$Base/api/health" -UseBasicParsing -TimeoutSec 5
+    if ($res.StatusCode -ne 200) { return $false }
+    return [bool](($res.Content | ConvertFrom-Json).ok)
+  } catch {
+    return $false
+  }
+}
+
+# Не держим в конфиге адрес мертвого туннеля: сервер подхватит новый, когда он будет готов.
+$urlFile = Join-Path $dataDir 'tunnel-url.txt'
+if (Test-Path $urlFile) {
+  $previous = (Get-Content $urlFile -Raw -ErrorAction SilentlyContinue).Trim()
+  if ($previous -and -not (Test-Tunnel $previous)) {
+    Write-Host 'Старый адрес туннеля недоступен — убираю его из конфигурации.' -ForegroundColor Yellow
+    Remove-Item $urlFile -Force -ErrorAction SilentlyContinue
+  }
+}
+
+Write-Host "Поднимаю туннель на http://127.0.0.1:$Port …"
+$cliArgs = @('tunnel', '--no-autoupdate', '--no-prechecks', '--protocol', 'http2', '--edge-ip-version', '4', '--url', "http://127.0.0.1:$Port", '--logfile', $log)
 $proc = Start-Process -FilePath $exe -ArgumentList $cliArgs -PassThru -WindowStyle Hidden
 
 $found = ''
 for ($i = 0; $i -lt 45; $i++) {
   Start-Sleep -Seconds 1
   if (Test-Path $log) {
-    $match = Select-String -Path $log -Pattern 'https://[a-z0-9][a-z0-9-]*\.trycloudflare\.com' -AllMatches |
-      Select-Object -First 1
-    if ($match -and $match.Matches.Count -gt 0) {
-      $found = $match.Matches[0].Value
+    $raw = Get-Content -Path $log -Raw -ErrorAction SilentlyContinue
+    $match = [regex]::Match(
+      $raw,
+      'https://[a-z0-9][a-z0-9-]*\.trycloudflare\.com',
+      [Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+    if ($match.Success) {
+      $found = $match.Value.TrimEnd('/')
       break
     }
   }
@@ -71,7 +96,20 @@ if (-not $found) {
   exit 1
 }
 
-$found | Set-Content -Path (Join-Path $dataDir 'tunnel-url.txt') -NoNewline -Encoding UTF8
+Write-Host "Проверяю доступность $found …" -NoNewline
+$ready = $false
+for ($j = 0; $j -lt 20; $j++) {
+  if (Test-Tunnel $found) { $ready = $true; break }
+  Start-Sleep -Seconds 1
+}
+Write-Host ''
+
+if (-not $ready) {
+  Write-Host 'Туннель поднялся, но сервер за ним не отвечает — адрес не записан, чтобы не залип мертвый URL.' -ForegroundColor Red
+  exit 1
+}
+
+$found | Set-Content -Path $urlFile -NoNewline -Encoding UTF8
 Write-Host ''
 Write-Host '════════════════════════════════════════════════════════' -ForegroundColor Green
 Write-Host " Публичный адрес: $found" -ForegroundColor Green
