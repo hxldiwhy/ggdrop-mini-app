@@ -52,9 +52,9 @@ async function withStrictServer(fn) {
   }
 }
 
-test('строгий вход: ссылка без initData не принимается', async () => {
-  await withStrictServer(async ({ call, user }) => {
-    const r = await call('/api/session', { method: 'POST', body: { t: signToken(user.id) } });
+test('строгий вход: вход без кнопки бота не принимается', async () => {
+  await withStrictServer(async ({ call }) => {
+    const r = await call('/api/session', { method: 'POST', body: { initData: '' } });
     assert.equal(r.status, 401);
     assert.equal(r.data.error, 'ACCOUNT_CHECK');
   });
@@ -88,7 +88,7 @@ test('строгий вход: свои initData + ссылка дают сес�
   });
 });
 
-test('строгий вход: Wiftgram без подписи пускает только своего игрока по кнопке', async () => {
+test('строгий вход: Wiftgram без подписи пускает игрока по персональной кнопке', async () => {
   await withStrictServer(async ({ call, user }) => {
     const login = signToken(user.id);
     const r = await call('/api/session', {
@@ -102,12 +102,30 @@ test('строгий вход: Wiftgram без подписи пускает т�
     assert.equal(me.status, 200);
     assert.equal(me.data.user.id, user.id);
 
-    const reused = await call('/api/session', {
+    // Кнопку в меню бота можно нажать повторно без запроса /start.
+    const again = await call('/api/session', {
       method: 'POST',
       body: { t: login, unsafe: { user: { id: user.id } } },
     });
-    assert.equal(reused.status, 401);
-    assert.equal(reused.data.error, 'LINK_USED');
+    assert.equal(again.status, 200);
+  });
+});
+
+test('строгий вход: Wiftgram без id клиента пускает только по кнопке бота', async () => {
+  await withStrictServer(async ({ call, user }) => {
+    const r = await call('/api/session', {
+      method: 'POST',
+      body: { t: signToken(user.id) },
+    });
+    assert.equal(r.status, 200);
+
+    const me = await call('/api/me', { token: r.data.token });
+    assert.equal(me.status, 200);
+    assert.equal(me.data.user.id, user.id);
+
+    const noToken = await call('/api/session', { method: 'POST', body: {} });
+    assert.equal(noToken.status, 401);
+    assert.equal(noToken.data.error, 'ACCOUNT_CHECK');
   });
 });
 
