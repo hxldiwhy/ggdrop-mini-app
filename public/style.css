@@ -1590,6 +1590,13 @@ select { appearance: none; background-image: none !important; }
 .plinko-count-row__label { flex: 0 0 auto; margin: 0 !important; color: #8BA0BF; font-size: 12px; }
 .plinko-count { display: flex; flex: 1; min-width: 0; gap: 6px; }
 .plinko-count .chip-btn { flex: 1; min-width: 0; min-height: 44px; padding: 0 2px; font-size: 12px; }
+.plinko-count__input {
+  flex: 0 0 54px; width: 54px; min-height: 44px; min-width: 0;
+  padding: 0 4px; text-align: center; color: #EDF3FF;
+  background: #121F35; border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px; font: inherit; font-size: 12px; font-variant-numeric: tabular-nums;
+}
+.plinko-count__input:focus { outline: none; border-color: #38E1FF; }
 .plinko-total {
   margin-top: 6px; text-align: center; color: #8BA0BF;
   font-size: 11px; font-variant-numeric: tabular-nums;
