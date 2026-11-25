@@ -1,7 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { CasinoError, ERRORS } from './errors.js';
 import { playRoulette, rouletteLabel, normalizeBets } from './games/roulette.js';
-import { playDice, diceChance } from './games/dice.js';
 import { crashPointFromSeed, newRoundSeed, seedHash, multiplierAt, timeForMultiplier } from './games/crash.js';
 import { newShoe, draw, handValue, playDealer, canDouble } from './games/blackjack.js';
 import { spinWheelGame, pickSegment, WHEEL_SEGMENTS } from './games/wheel.js';
@@ -14,6 +13,7 @@ const uid = () => `${now().toString(36)}${Math.random().toString(36).slice(2, 8)
 const LUCKY_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const LUCKY_BASE = 300; // приз = LUCKY_BASE × сектор.m
 const AUCTION_ANTI_SNIPE_MS = 30000; // ставка в последние 30 секунд продлевает лот
+const WITHDRAW_FEE = 0.13; // комиссия казино при выплате заявки
 
 const NFT_NAMES = {
   common: ['Космокот', 'Звёздный пёс', 'Милый череп', 'Неоновая рыбка'],
@@ -192,22 +192,7 @@ export class Engine extends EventEmitter {
     };
   }
 
-  // ─── кости ──────────────────────────────────────────────────────────────────
-  rollDice(userId, { amount, target, over }) {
-    const user = this.user(userId);
-    const amt = this.assertBet(user, amount, 'dice');
-    this.takeBet(user, amt);
-    const res = playDice({ amount: amt, target, over, rng, edge: this.settings.houseEdge.dice });
-    const detail = `Бросок ${res.roll} ${res.direction === 'over' ? '>' : '<'} ${res.target} (x${res.multiplier})`;
-    const settled = this.settle(user, 'dice', amt, res.payout, detail, { roll: res.roll });
-    return {
-      ...res,
-      payout: settled.payout,
-      profit: settled.profit,
-      balance: user.balance,
-      totalBet: amt,
-    };
-  }
+  // Кости удалены по требованию владельца.
 
   // ─── блэкджек ───────────────────────────────────────────────────────────────
   startBlackjack(userId, amount) {
@@ -560,7 +545,7 @@ export class Engine extends EventEmitter {
 
   /** Лента крупных выигрышей всех игроков (для social-proof на главной). */
   winFeed(limit = 20) {
-    const gameNames = new Set(['roulette', 'crash', 'dice', 'blackjack', 'wheel', 'plinko', 'coinflip', 'lucky']);
+    const gameNames = new Set(['roulette', 'crash', 'blackjack', 'wheel', 'plinko', 'coinflip', 'lucky']);
     const out = [];
     for (let i = this.store.data.history.length - 1; i >= 0 && out.length < limit; i--) {
       const h = this.store.data.history[i];
@@ -723,7 +708,7 @@ export class Engine extends EventEmitter {
     const amt = Math.round(Number(amount));
     if (!Number.isFinite(amt) || amt <= 0) throw new CasinoError('WITHDRAW_INVALID', 'Укажи сумму вывода');
     const min = Math.max(1, Number(s.minWithdraw) || 1000);
-    const max = Math.min(Math.max(min, Number(s.maxWithdraw) || 150000), this.store.balanceCap());
+    const max = Math.max(min, Number(s.maxWithdraw) || 1000000);
     if (amt < min) throw new CasinoError('WITHDRAW_TOO_LOW', `Минимальный вывод: ${min} ⭐`);
     if (amt > max) throw new CasinoError('WITHDRAW_TOO_HIGH', `Максимальный вывод: ${max} ⭐`);
     if (user.balance < amt) throw new CasinoError('BALANCE_LOW', ERRORS.BALANCE_LOW);
@@ -732,6 +717,9 @@ export class Engine extends EventEmitter {
     const cleanContact = String(contact || '').trim().slice(0, 200);
 
     // Деньги сразу резервируются: нельзя подать две заявки на один и тот же баланс.
+    // Комиссия удерживается только при выплате — при отклонении возвращается вся сумма.
+    const fee = Math.round(amt * WITHDRAW_FEE);
+    const net = amt - fee;
     user.balance -= amt;
     this.store.save();
     this.store.history({
@@ -740,7 +728,7 @@ export class Engine extends EventEmitter {
       bet: 0,
       payout: -amt,
       profit: -amt,
-      detail: `Заявка на вывод (зарезервировано) ${amt} ⭐`,
+      detail: `Заявка на вывод ${amt} ⭐ (к выплате ${net} ⭐, комиссия ${fee} ⭐)`,
     });
     const wd = {
       id: `W${this.store.nextId().toString(36).toUpperCase()}`,
@@ -748,6 +736,8 @@ export class Engine extends EventEmitter {
       userName: shortName(user),
       username: user.username || '',
       amount: amt,
+      fee,
+      net,
       contact: cleanContact,
       status: 'pending',
       createdAt: now(),
@@ -789,6 +779,17 @@ export class Engine extends EventEmitter {
     wd.decidedBy = Number(adminId);
     wd.note = String(note || '').trim().slice(0, 200);
     const user = this.store.user(wd.userId);
+    if (approve && user && wd.fee) {
+      this.store.data.meta.totalFees = (this.store.data.meta.totalFees || 0) + wd.fee;
+      this.store.history({
+        userId: user.id,
+        game: 'fee',
+        bet: 0,
+        payout: 0,
+        profit: -wd.fee,
+        detail: `Комиссия 13% за вывод #${wd.id}`,
+      });
+    }
     if (!approve && user) {
       this.store.credit(user, wd.amount, 'withdraw-refund');
       this.store.history({
@@ -870,6 +871,23 @@ export class Engine extends EventEmitter {
     return active.find((a) => a.id === lotId) || null;
   }
 
+  /** Деньги ставки лежат в резерве лота: они не сгорают, пока игрок лидирует. */
+  _auctionEscrow(lot) {
+    if (!lot.escrow) {
+      // Совместимость со старыми лотами: сумма уже списана с баланса лидера.
+      lot.escrow = lot.leader ? { [lot.leader.id]: Number(lot.currentBid) || 0 } : {};
+    }
+    return lot.escrow;
+  }
+
+  auctionReserved(userId) {
+    let sum = 0;
+    for (const lot of this._activeAuctions()) {
+      sum += Number(this._auctionEscrow(lot)[userId] || 0);
+    }
+    return Math.round(sum);
+  }
+
   /** Имя в публичном ответе: своё и хозяину — полное, остальным — маска. */
   _auctionName(userId, viewerId) {
     const u = this.store.user(userId);
@@ -906,12 +924,15 @@ export class Engine extends EventEmitter {
       endsAt: lot.endsAt,
       finishedAt: lot.finishedAt || 0,
       burned: lot.burned || 0,
+      reserved: Number(this._auctionEscrow(lot)[viewerId] || 0),
+      escrowTotal: Object.values(this._auctionEscrow(lot)).reduce((sum, v) => sum + (Number(v) || 0), 0),
       bids: (lot.bids || []).slice(-12).reverse().map((b) => ({
         id: b.id,
         name: this._auctionName(b.userId, viewerId),
         amount: b.amount,
         ts: b.ts,
         burned: !!b.burned,
+        reserved: !!b.reserved,
         mine: Number(b.userId) === Number(viewerId),
       })),
     };
@@ -929,8 +950,11 @@ export class Engine extends EventEmitter {
   _finishAuction(status, lotId) {
     const lot = this._activeAuction(lotId);
     if (!lot) return null;
+    const escrow = this._auctionEscrow(lot);
     const leader = lot.leader;
-    const amount = lot.currentBid || 0;
+    // Победитель уже зарезервировал сумму: она не списывается второй раз.
+    const amount = leader ? Number(escrow[leader.id] || lot.currentBid || 0) : 0;
+    if (leader) delete escrow[leader.id];
     if (status === 'sold' && leader) {
       const winUser = this.store.user(leader.id);
       const hostId = Number(lot.hostId || this.settings.ownerId);
@@ -987,6 +1011,7 @@ export class Engine extends EventEmitter {
       lot: lots[0] || null,
       history,
       burned: this.store.data.meta.totalBurned || 0,
+      reserved: this.auctionReserved(viewerId),
     };
   }
 
@@ -1013,6 +1038,7 @@ export class Engine extends EventEmitter {
       winner: null,
       bids: [],
       burned: 0,
+      escrow: {},
       status: 'active',
       startedAt: now(),
       endsAt: now() + minutes * 60000,
@@ -1034,36 +1060,53 @@ export class Engine extends EventEmitter {
     if (Number(user.id) === Number(lot.hostId || this.settings.ownerId)) {
       throw new CasinoError('INVALID_ACTION', 'Организатор не ставит на свой лот');
     }
-    const amt = this.assertBet(user, body.amount, 'auction');
+    const amt = Math.round(Number(body.amount));
+    this.checkPlayable(user);
+    if (!Number.isFinite(amt) || amt <= 0) throw new CasinoError('BET_INVALID', ERRORS.BET_INVALID);
+    if (amt < this.settings.minBet) throw new CasinoError('BET_TOO_LOW', `${ERRORS.BET_TOO_LOW} (${this.settings.minBet})`);
+    if (amt > this.settings.maxBet) throw new CasinoError('BET_TOO_HIGH', `${ERRORS.BET_TOO_HIGH} (${this.settings.maxBet})`);
+    const limit = Number(this.settings.limits?.auction ?? this.settings.maxBet);
+    if (amt > limit) throw new CasinoError('BET_TOO_HIGH', `${ERRORS.BET_TOO_HIGH} для этой игры (${limit})`);
     const need = lot.leader ? Math.max(lot.currentBid + lot.step, lot.minBid) : lot.minBid;
     if (amt < need) throw new CasinoError('BET_TOO_LOW', `Нужно не меньше ${need} ⭐`);
-    this.takeBet(user, amt);
 
-    // Перебитая ставка не возвращается — она сгорает и уходит в видимый счётчик.
-    if (lot.leader) {
-      const prev = this.store.user(lot.leader.id);
+    const escrow = this._auctionEscrow(lot);
+    const isMine = lot.leader && Number(lot.leader.id) === Number(user.id);
+    const held = Number(escrow[user.id] || 0);
+    // При повышении своей ставки списывается только разница: старые деньги уже в резерве.
+    const delta = isMine ? Math.max(0, amt - held) : amt;
+    if (delta > 0) this.takeBet(user, delta);
+
+    // Сгорает только проигравшая ставка — в момент, когда её перебили.
+    if (lot.leader && !isMine) {
+      const prevId = lot.leader.id;
+      const prevHeld = Number(escrow[prevId] || lot.currentBid || 0);
+      const prev = this.store.user(prevId);
       const prevBid = (lot.bids || []).find((b) => b.id === lot.leader.bidId);
       if (prevBid) prevBid.burned = true;
-      if (prev) {
-        lot.burned = (lot.burned || 0) + lot.currentBid;
-        this.store.data.meta.totalBurned = (this.store.data.meta.totalBurned || 0) + lot.currentBid;
+      delete escrow[prevId];
+      if (prev && prevHeld > 0) {
+        lot.burned = (lot.burned || 0) + prevHeld;
+        this.store.data.meta.totalBurned = (this.store.data.meta.totalBurned || 0) + prevHeld;
         this.store.history({
           userId: prev.id,
           game: 'auction',
-          bet: lot.currentBid,
+          bet: prevHeld,
           payout: 0,
-          profit: -lot.currentBid,
+          profit: -prevHeld,
           detail: `Ставка сгорела — перебита в лоте «${lot.title}»`,
         });
       }
     }
 
+    escrow[user.id] = amt;
     const bid = {
       id: `${user.id}-${now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
       userId: user.id,
       amount: amt,
       ts: now(),
       burned: false,
+      reserved: true,
     };
     lot.bids = lot.bids || [];
     lot.bids.push(bid);
@@ -1077,6 +1120,7 @@ export class Engine extends EventEmitter {
     return {
       lot: this._auctionView(lot, user.id),
       balance: user.balance,
+      reserved: Number(escrow[user.id] || 0),
       minNext: Math.max(amt + lot.step, lot.minBid),
     };
   }
@@ -1115,6 +1159,9 @@ export class Engine extends EventEmitter {
     this.assertOwner(adminId);
     const target = this.store.user(targetId);
     if (!target) throw new CasinoError('USER_NOT_FOUND', ERRORS.USER_NOT_FOUND, 404);
+    if (this.isOwner(targetId) && (action === 'ban' || action === 'reset')) {
+      throw new CasinoError('INVALID_ACTION', 'Нельзя забанить или сбросить хозяина');
+    }
     const amt = Math.round(Number(amount) || 0);
     if (action === 'credit') this.store.credit(target, Math.abs(amt), 'admin');
     else if (action === 'debit') this.store.credit(target, -Math.abs(amt), 'admin');
@@ -1158,20 +1205,11 @@ export class Engine extends EventEmitter {
     if (patch.cashierUsername !== undefined) clean.cashierUsername = String(patch.cashierUsername || '').replace(/^@/, '').slice(0, 32);
     if (patch.minDeposit !== undefined) clean.minDeposit = num(patch.minDeposit, 1, 1e9, s.minDeposit);
     if (patch.maxDeposit !== undefined) clean.maxDeposit = num(patch.maxDeposit, clean.minDeposit ?? s.minDeposit, 1e9, s.maxDeposit);
-    if (patch.maxBalance !== undefined) clean.maxBalance = num(patch.maxBalance, 1000, 1e9, s.maxBalance);
+    if (patch.maxBalance !== undefined) clean.maxBalance = 0; // потолок снят навсегда
     if (patch.minWithdraw !== undefined) clean.minWithdraw = num(patch.minWithdraw, 1, 1e9, s.minWithdraw);
     if (patch.maxWithdraw !== undefined) clean.maxWithdraw = num(patch.maxWithdraw, clean.minWithdraw ?? s.minWithdraw, 1e9, s.maxWithdraw);
     if (patch.storageFee && typeof patch.storageFee === 'object') {
-      const f = { ...(s.storageFee || {}) };
-      if (patch.storageFee.enabled !== undefined) f.enabled = !!patch.storageFee.enabled;
-      if (patch.storageFee.threshold !== undefined) {
-        f.threshold = num(patch.storageFee.threshold, 0, clean.maxBalance ?? s.maxBalance, f.threshold);
-      }
-      if (patch.storageFee.percentPerDay !== undefined) {
-        const v = Number(patch.storageFee.percentPerDay);
-        f.percentPerDay = Number.isFinite(v) ? Math.min(5, Math.max(0, v)) : f.percentPerDay;
-      }
-      clean.storageFee = f;
+      clean.storageFee = { enabled: false, threshold: 100000, percentPerDay: 0, intervalMs: s.storageFee?.intervalMs || 86400000 };
     }
     if (patch.bettingMs !== undefined) clean.crash = { ...s.crash, bettingMs: num(patch.bettingMs, 3000, 30000, s.crash.bettingMs) };
     if (patch.cooldownMs !== undefined) clean.crash = { ...(clean.crash || s.crash), cooldownMs: num(patch.cooldownMs, 1000, 30000, s.crash.cooldownMs) };
