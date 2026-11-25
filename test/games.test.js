@@ -148,18 +148,18 @@ test('плинко: таблицы, вероятности, путь шарик�
   for (let i = 0; i <= 12; i++) sum += bucketProbability(12, i);
   assert.ok(Math.abs(sum - 1) < 1e-9);
 
-  const allRight = dropBall({ amount: 100, rows: 8, risk: 'low', rng: () => 0.1, edge: 0.03 });
+  const allRight = dropBall({ amount: 100, rows: 8, risk: 'high', rng: () => 0.1, edge: 0.03 });
   assert.equal(allRight.path.length, 8);
   assert.equal(allRight.bucket, 8);
-  assert.equal(allRight.multiplier, multipliersFor(8, 'low', 0.03)[8]);
+  assert.equal(allRight.multiplier, multipliersFor(8, 'high', 0.03)[8]);
 
-  const allLeft = dropBall({ amount: 100, rows: 8, risk: 'low', rng: () => 0.9, edge: 0.03 });
+  const allLeft = dropBall({ amount: 100, rows: 8, risk: 'high', rng: () => 0.9, edge: 0.03 });
   assert.equal(allLeft.bucket, 0);
 
   let bet = 0;
   let paid = 0;
   for (let i = 0; i < 40000; i++) {
-    const r = dropBall({ amount: 100, rows: 12, risk: 'medium', rng: Math.random, edge: 0.03 });
+    const r = dropBall({ amount: 100, rows: 12, risk: 'high', rng: Math.random, edge: 0.03 });
     bet += 100;
     paid += r.payout;
   }
@@ -167,24 +167,26 @@ test('плинко: таблицы, вероятности, путь шарик�
   assert.ok(rtp > 0.9 && rtp < 1.04, `RTP плинко ${rtp.toFixed(3)}`);
 });
 
-test('плинко: низкий риск проигрывает в центре чаще', () => {
+test('плинко: остался только высокий риск', () => {
+  assert.deepEqual(Object.keys(RISKS), ['high']);
+  assert.equal(RISKS.low, undefined);
+  assert.equal(RISKS.medium, undefined);
   for (const rows of ROWS) {
-    const table = RISKS.low[rows];
+    const table = RISKS.high[rows];
     const center = rows / 2;
     assert.equal(table[center], 0.2, `${rows}: центр`);
     assert.ok(table[center - 1] < 1 && table[center + 1] < 1, `${rows}: соседи должны быть минусовыми`);
-    const lossChance = table.reduce((sum, m, i) => sum + (m < 1 ? bucketProbability(rows, i) : 0), 0);
-    assert.ok(lossChance > 0.5, `${rows}: шанс минуса ${lossChance}`);
-    assert.ok(baseRtp(rows, 'low') > 0.9, `${rows}: RTP ${baseRtp(rows, 'low')}`);
+    assert.ok(table[0] > 20, `${rows}: край должен быть крупным`);
+    assert.ok(baseRtp(rows, 'high') > 0.9, `${rows}: RTP ${baseRtp(rows, 'high')}`);
   }
 });
 
 test('плинко: несколько шариков и общая ставка', () => {
-  assert.equal(clampBalls(99), MAX_BALLS);
+  assert.equal(clampBalls(999), MAX_BALLS);
   assert.equal(clampBalls(0), 1);
   assert.equal(clampBalls('3'), 3);
 
-  const r = dropBalls({ amount: 100, rows: 12, risk: 'low', count: 5, rng: fixed(0.4), edge: 0.03 });
+  const r = dropBalls({ amount: 100, rows: 12, risk: 'high', count: 5, rng: fixed(0.4), edge: 0.03 });
   assert.equal(r.balls.length, 5);
   assert.equal(r.totalBet, 500);
   assert.equal(r.perBet, 100);
