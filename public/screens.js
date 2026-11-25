@@ -184,7 +184,7 @@ async function renderWallet() {
   $('walletVault').textContent = u.reserved
     ? `В аукционах в резерве: ${money(u.reserved)} ⭐`
     : 'Потолок снят · баланс без ограничений';
-  $('walletCap').textContent = 'без лимита';
+  $('walletCap').textContent = 'без потолка';
   $('walletFee').textContent = '13% при выводе';
   $('walletWithdraw').textContent = `${fmt(s.minWithdraw || 1000)} – ${fmt(s.maxWithdraw || 1000000)} ⭐`;
   const box = $('walletTx');
