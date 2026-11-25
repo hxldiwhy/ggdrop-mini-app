@@ -74,6 +74,7 @@ export function publicUser(engine, u) {
     username: u.username || '',
     firstName: u.firstName || '',
     balance: u.balance,
+    reserved: engine.auctionReserved(u.id),
     isOwner: engine.isOwner(u.id),
     banned: !!u.banned,
     vault: u.vault || 0,
@@ -113,10 +114,11 @@ export function publicSettings(engine) {
     minDeposit: s.minDeposit,
     maxDeposit: s.maxDeposit,
     maxPendingDeposits: s.maxPendingDeposits,
-    maxBalance: engine.store.balanceCap(),
+    maxBalance: 0,
     storageFee: s.storageFee,
     minWithdraw: s.minWithdraw,
     maxWithdraw: s.maxWithdraw,
+    withdrawFee: 0.13,
   };
 }
 
@@ -212,7 +214,26 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
         const linked = body.t ? verifyToken(String(body.t)) : null;
         const unsafe = body.unsafe && typeof body.unsafe === 'object' ? body.unsafe : null;
         const unsafeId = Number(unsafe?.user?.id || 0);
+        const device = String(body.device || '').slice(0, 80);
         let via = '';
+
+        // Wiftgram не отдаёт identity. Кнопку бота нельзя просто скопировать:
+        // первое устройство, открывшее ссылку, навсегда привязывает её к себе.
+        const bindDevice = () => {
+          if (!device || !linked) {
+            throw new CasinoError('ACCOUNT_CHECK', 'Открой казино кнопкой в Wiftgram', 401);
+          }
+          const devices = (store.data.meta.tokenDevices ||= {});
+          const key = linked.nonce;
+          const saved = devices[key];
+          if (saved && saved !== device) {
+            throw new CasinoError('LINK_USED', 'Эта ссылка уже открыта на другом аккаунте. Нажми кнопку заново в своём боте', 401);
+          }
+          if (!saved) {
+            devices[key] = device;
+            store.save();
+          }
+        };
 
         if (requireInitData) {
           const signedOk = !!client && (!linked || Number(client.user.id) === linked.userId);
@@ -239,6 +260,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
             throw new CasinoError('ACCOUNT_CHECK', 'Нужна проверка аккаунта: открой казино кнопкой в Wiftgram', 401);
           }
           via = unsafeOk ? 'unsafe' : tokenOk ? 'token' : '';
+          if (tokenOk) bindDevice();
         } else {
           if (client && linked && Number(client.user.id) !== linked.userId) {
             throw new CasinoError('ACCOUNT_MISMATCH', 'Эта ссылка выдана другому аккаунту. Открой казино из своего бота', 401);
@@ -340,11 +362,6 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
         if (p === '/api/roulette/bet' && req.method === 'POST') {
           stop();
           const r = engine.spinRoulette(user.id, body.bets);
-          return sendJson(res, 200, { ok: true, ...r, user: publicUser(engine, user) });
-        }
-        if (p === '/api/dice/bet' && req.method === 'POST') {
-          stop();
-          const r = engine.rollDice(user.id, { amount: body.amount, target: body.target, over: !!body.over });
           return sendJson(res, 200, { ok: true, ...r, user: publicUser(engine, user) });
         }
         if (p === '/api/wheel/spin' && req.method === 'POST') {
