@@ -48,7 +48,7 @@ async function readJson(req) {
     req.on('data', (c) => {
       size += c.length;
       if (size > MAX_BODY) {
-        reject(new CasinoError('BODY_TOO_LARGE', 'РЎР»РёС€РєРѕРј Р±РѕР»СЊС€РѕР№ Р·Р°РїСЂРѕСЃ', 413));
+        reject(new CasinoError('BODY_TOO_LARGE', 'Слишком большой запрос', 413));
         req.destroy();
         return;
       }
@@ -59,7 +59,7 @@ async function readJson(req) {
       try {
         resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')));
       } catch {
-        reject(new CasinoError('BAD_JSON', 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ JSON'));
+        reject(new CasinoError('BAD_JSON', 'Некорректный JSON'));
       }
     });
     req.on('error', reject);
@@ -127,7 +127,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
     const arr = (rate.get(userId) || []).filter((x) => t - x < 2000);
     arr.push(t);
     rate.set(userId, arr);
-    if (arr.length > 40) throw new CasinoError('RATE_LIMIT', 'РЎР»РёС€РєРѕРј РјРЅРѕРіРѕ Р·Р°РїСЂРѕСЃРѕРІ, РїСЂРёС‚РѕСЂРјРѕР·Рё', 429);
+    if (arr.length > 40) throw new CasinoError('RATE_LIMIT', 'Слишком много запросов, притормози', 429);
     if (rate.size > 5000) rate.clear();
   }
 
@@ -135,25 +135,25 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
     const header = req.headers.authorization || '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : '';
     const data = verifyToken(token);
-    if (!data) throw new CasinoError('UNAUTHORIZED', 'РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°, РѕС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ Р·Р°РЅРѕРІРѕ', 401);
+    if (!data) throw new CasinoError('UNAUTHORIZED', 'Сессия истекла, открой казино заново', 401);
     const user = store.user(data.userId);
-    if (!user) throw new CasinoError('USER_NOT_FOUND', 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ', 401);
-    // РўРѕРєРµРЅ РёР· РєРЅРѕРїРєРё Р±РѕС‚Р° РїСЂРёРІСЏР·Р°РЅ Рє РєРѕРЅРєСЂРµС‚РЅРѕРјСѓ client-Р·Р°РїСЂРѕСЃСѓ Wiftgram.
-    // РџРѕРґРјРµРЅРёС‚СЊ СЃСЃС‹Р»РєСѓ С‡СѓР¶РёРј Р°РєРєР°СѓРЅС‚РѕРј РЅРµ РїРѕР»СѓС‡РёС‚СЃСЏ: initData РїРѕРґРїРёСЃР°РЅ Р±РѕС‚РѕРј.
+    if (!user) throw new CasinoError('USER_NOT_FOUND', 'Пользователь не найден', 401);
+    // Токен из кнопки бота привязан к конкретному client-запросу Wiftgram.
+    // Подменить ссылку чужим аккаунтом не получится: initData подписан ботом.
     if (requireInitData) {
       const raw = String(req.headers['x-wiftgram-init-data'] || '');
-      // Wiftgram РЅРµ РІСЃРµРіРґР° РїРѕРґРїРёСЃС‹РІР°РµС‚ initData. Р•СЃР»Рё РєР»РёРµРЅС‚ РїСЂРёСЃР»Р°Р» РїРѕРґРїРёСЃСЊ вЂ”
-      // РїСЂРѕРІРµСЂСЏРµРј РµС‘; РёРЅР°С‡Рµ СЂР°Р·СЂРµС€Р°РµРј С‚РѕР»СЊРєРѕ СЃРµСЃСЃРёСЋ, РІС‹РґР°РЅРЅСѓСЋ РѕРґРЅРѕСЂР°Р·РѕРІРѕР№ РєРЅРѕРїРєРѕР№.
+      // Wiftgram не всегда подписывает initData. Если клиент прислал подпись —
+      // проверяем её; иначе разрешаем только сессию, выданную одноразовой кнопкой.
       const client = raw ? parseInitData(raw, CONFIG.token, 0) : null;
       if (raw && (!client || Number(client.user.id) !== data.userId)) {
-        throw new CasinoError('ACCOUNT_MISMATCH', 'РЎРµСЃСЃРёСЏ РїСЂРёРІСЏР·Р°РЅР° Рє РґСЂСѓРіРѕРјСѓ Р°РєРєР°СѓРЅС‚Сѓ. РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ Р·Р°РЅРѕРІРѕ РёР· Р±РѕС‚Р°', 401);
+        throw new CasinoError('ACCOUNT_MISMATCH', 'Сессия привязана к другому аккаунту. Открой казино заново из бота', 401);
       }
       if (!raw && data.via !== 'unsafe') {
-        throw new CasinoError('ACCOUNT_CHECK', 'РќСѓР¶РЅР° РїСЂРѕРІРµСЂРєР° Р°РєРєР°СѓРЅС‚Р°: РѕС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ РєРЅРѕРїРєРѕР№ РІ Wiftgram', 401);
+        throw new CasinoError('ACCOUNT_CHECK', 'Нужна проверка аккаунта: открой казино кнопкой в Wiftgram', 401);
       }
-      // РќРѕРІС‹Рµ С‚РѕРєРµРЅС‹ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ РїСЂРёРІСЏР·Р°РЅС‹ Рє РєРѕРЅРєСЂРµС‚РЅРѕРјСѓ Р·Р°РїСЂРѕСЃСѓ Wiftgram.
+      // Новые токены дополнительно привязаны к конкретному запросу Wiftgram.
       if (client && data.sessionId && client.queryId !== data.sessionId) {
-        throw new CasinoError('ACCOUNT_MISMATCH', 'РЎРµСЃСЃРёСЏ РїСЂРёРІСЏР·Р°РЅР° Рє РґСЂСѓРіРѕРјСѓ Р°РєРєР°СѓРЅС‚Сѓ. РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ Р·Р°РЅРѕРІРѕ РёР· Р±РѕС‚Р°', 401);
+        throw new CasinoError('ACCOUNT_MISMATCH', 'Сессия привязана к другому аккаунту. Открой казино заново из бота', 401);
       }
     }
     engine.applyStorageFee(user);
@@ -194,7 +194,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
         return sendJson(res, 200, { ok: true, ts: Date.now(), phase: engine.crash.phase });
       }
 
-      // в”Ђв”Ђв”Ђ РІРµР±С…СѓРє Wiftgram в”Ђв”Ђв”Ђ
+      // ─── вебхук Wiftgram ───
       if (p.startsWith('/webhook/') && req.method === 'POST') {
         if (CONFIG.webhookSecret && p !== `/webhook/${CONFIG.webhookSecret}`) {
           return sendJson(res, 403, { ok: false });
@@ -204,7 +204,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
         return sendJson(res, 200, { ok: true });
       }
 
-      // в”Ђв”Ђв”Ђ СЃРµСЃСЃРёСЏ в”Ђв”Ђв”Ђ
+      // ─── сессия ───
       if (p === '/api/session' && req.method === 'POST') {
         const body = await readJson(req);
         const rawInit = String(body.initData || '');
@@ -223,43 +223,43 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
 
           if (wrongUser) {
             const who = client ? `client=${client.user.id}` : `webApp id=${unsafeId}`;
-            console.warn(`[session] РЅРµСЃРѕРІРїР°РґРµРЅРёРµ Р°РєРєР°СѓРЅС‚Р°: ${who}, token=${linked?.userId || '-'}`);
-            throw new CasinoError('ACCOUNT_MISMATCH', 'Р­С‚Р° СЃСЃС‹Р»РєР° РІС‹РґР°РЅР° РґСЂСѓРіРѕРјСѓ Р°РєРєР°СѓРЅС‚Сѓ. РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ РёР· СЃРІРѕРµРіРѕ Р±РѕС‚Р°', 401);
+            console.warn(`[session] несовпадение аккаунта: ${who}, token=${linked?.userId || '-'}`);
+            throw new CasinoError('ACCOUNT_MISMATCH', 'Эта ссылка выдана другому аккаунту. Открой казино из своего бота', 401);
           }
           if (!signedOk && !unsafeOk) {
-            let why = 'РЅРµС‚ initData Рё id РєР»РёРµРЅС‚Р°';
+            let why = 'нет initData и id клиента';
             if (rawInit) {
               const params = new URLSearchParams(rawInit);
-              why = params.has('hash') ? 'РїР»РѕС…Р°СЏ РїРѕРґРїРёСЃСЊ РёР»Рё СЃС‚Р°СЂС‹Р№ auth_date' : 'РЅРµС‚ hash';
+              why = params.has('hash') ? 'плохая подпись или старый auth_date' : 'нет hash';
             }
-            console.warn(`[session] РїСЂРѕРІРµСЂРєР° Р°РєРєР°СѓРЅС‚Р° РЅРµ РїСЂРѕР№РґРµРЅР°: ${why}; РґР»РёРЅР°=${rawInit.length}; tokenLen=${CONFIG.token.length}`);
-            throw new CasinoError('ACCOUNT_CHECK', 'РќСѓР¶РЅР° РїСЂРѕРІРµСЂРєР° Р°РєРєР°СѓРЅС‚Р°: РѕС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ РєРЅРѕРїРєРѕР№ РІ Wiftgram', 401);
+            console.warn(`[session] проверка аккаунта не пройдена: ${why}; длина=${rawInit.length}; tokenLen=${CONFIG.token.length}`);
+            throw new CasinoError('ACCOUNT_CHECK', 'Нужна проверка аккаунта: открой казино кнопкой в Wiftgram', 401);
           }
           if (linked && !store.consumeLoginNonce(linked.nonce)) {
-            console.warn(`[session] СЃСЃС‹Р»РєР° СѓР¶Рµ РёСЃРїРѕР»СЊР·РѕРІР°РЅР°: nonce=${linked.nonce || '-'}`);
-            throw new CasinoError('LINK_USED', 'РЎСЃС‹Р»РєР° СѓР¶Рµ РёСЃРїРѕР»СЊР·РѕРІР°РЅР°. РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ Р·Р°РЅРѕРІРѕ РєРЅРѕРїРєРѕР№ РІ Р±РѕС‚Рµ', 401);
+            console.warn(`[session] ссылка уже использована: nonce=${linked.nonce || '-'}`);
+            throw new CasinoError('LINK_USED', 'Ссылка уже использована. Открой казино заново кнопкой в боте', 401);
           }
           viaUnsafe = unsafeOk;
         } else {
           if (client && linked && Number(client.user.id) !== linked.userId) {
-            throw new CasinoError('ACCOUNT_MISMATCH', 'Р­С‚Р° СЃСЃС‹Р»РєР° РІС‹РґР°РЅР° РґСЂСѓРіРѕРјСѓ Р°РєРєР°СѓРЅС‚Сѓ. РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ РёР· СЃРІРѕРµРіРѕ Р±РѕС‚Р°', 401);
+            throw new CasinoError('ACCOUNT_MISMATCH', 'Эта ссылка выдана другому аккаунту. Открой казино из своего бота', 401);
           }
           if (!client && linked && unsafeId && unsafeId !== linked.userId) {
-            throw new CasinoError('ACCOUNT_MISMATCH', 'Р­С‚Р° СЃСЃС‹Р»РєР° РІС‹РґР°РЅР° РґСЂСѓРіРѕРјСѓ Р°РєРєР°СѓРЅС‚Сѓ. РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ РёР· СЃРІРѕРµРіРѕ Р±РѕС‚Р°', 401);
+            throw new CasinoError('ACCOUNT_MISMATCH', 'Эта ссылка выдана другому аккаунту. Открой казино из своего бота', 401);
           }
         }
 
         const from = client?.user || null;
         let userId = from ? Number(from.id) : linked?.userId || 0;
-        if (!userId) throw new CasinoError('UNAUTHORIZED', 'РЎСЃС‹Р»РєР° СѓСЃС‚Р°СЂРµР»Р°. РћС‚РєСЂРѕР№ РєР°Р·РёРЅРѕ Р·Р°РЅРѕРІРѕ РёР· Р±РѕС‚Р°', 401);
+        if (!userId) throw new CasinoError('UNAUTHORIZED', 'Ссылка устарела. Открой казино заново из бота', 401);
         let user = store.user(userId);
         if (!user) {
-          if (!from) throw new CasinoError('UNAUTHORIZED', 'РЎРЅР°С‡Р°Р»Р° РЅР°Р¶РјРё /start РІ Р±РѕС‚Рµ', 401);
+          if (!from) throw new CasinoError('UNAUTHORIZED', 'Сначала нажми /start в боте', 401);
           user = store.ensureUser(from);
         }
         if (user.banned) throw new CasinoError('BANNED', ERRORS.BANNED, 403);
         engine.applyStorageFee(user);
-        // РїСЂРёРІРµС‚СЃС‚РІРµРЅРЅС‹Р№ Р±РѕРЅСѓСЃ, РµСЃР»Рё РёРіСЂРѕРє Р·Р°С€С‘Р» СЃСЂР°Р·Сѓ РІ РјРёРЅРё-РїСЂРёР»РѕР¶РµРЅРёРµ
+        // приветственный бонус, если игрок зашёл сразу в мини-приложение
         if (!user.welcomed && user.balance === 0 && store.settings.welcomeBonus > 0) {
           store.credit(user, store.settings.welcomeBonus, 'welcome');
           user.welcomed = true;
@@ -285,7 +285,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
           if (user.banned) throw new CasinoError('BANNED', ERRORS.BANNED, 403);
         };
 
-        // в”Ђв”Ђ РїСЂРѕС„РёР»СЊ в”Ђв”Ђ
+        // ── профиль ──
         if (p === '/api/games-info' && req.method === 'GET') {
           const edge = engine.settings.houseEdge;
           const total = WHEEL_SEGMENTS.reduce((s, x) => s + x.weight, 0);
@@ -337,7 +337,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
           return sendJson(res, 200, { ok: true, top });
         }
 
-        // в”Ђв”Ђ РёРіСЂС‹ в”Ђв”Ђ
+        // ── игры ──
         if (p === '/api/roulette/bet' && req.method === 'POST') {
           stop();
           const r = engine.spinRoulette(user.id, body.bets);
@@ -377,7 +377,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
           return sendJson(res, 200, { ok: true, items: engine.winFeed(limitN) });
         }
 
-        // в”Ђв”Ђ Р°СѓРєС†РёРѕРЅ в”Ђв”Ђ
+        // ── аукцион ──
         if (p === '/api/auction' && req.method === 'GET') {
           return sendJson(res, 200, { ok: true, ...engine.auctionPublic(user.id) });
         }
@@ -398,7 +398,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
           return sendJson(res, 200, { ok: true, ...r, user: publicUser(engine, user) });
         }
 
-        // в”Ђв”Ђ РїРѕРїРѕР»РЅРµРЅРёРµ Р·РІС‘Р·Рґ в”Ђв”Ђ
+        // ── пополнение звёзд ──
         if (p === '/api/deposit' && req.method === 'POST') {
           const dep = engine.createDeposit(user.id, body.amount);
           return sendJson(res, 200, { ok: true, deposit: dep, cashier: engine.settings.cashierUsername });
@@ -453,7 +453,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
           return sendJson(res, 200, { ok: true, ...r, user: publicUser(engine, store.user(user.id)) });
         }
 
-        // в”Ђв”Ђ Р°РґРјРёРЅ в”Ђв”Ђ
+        // ── админ ──
         if (p.startsWith('/api/admin/')) {
           engine.assertOwner(user.id);
           if (p === '/api/admin/overview' && req.method === 'GET') {
@@ -538,7 +538,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
           }
         }
 
-        throw new CasinoError('NOT_FOUND', 'РќРµРёР·РІРµСЃС‚РЅС‹Р№ РјРµС‚РѕРґ API', 404);
+        throw new CasinoError('NOT_FOUND', 'Неизвестный метод API', 404);
       }
 
       if (req.method === 'GET' || req.method === 'HEAD') {
@@ -551,7 +551,7 @@ export function createHttpServer({ engine, api, store, onWebhook, requireInitDat
         return sendJson(res, err.http || 400, { ok: false, error: err.code, description: err.message });
       }
       console.error('[http]', err);
-      return sendJson(res, 500, { ok: false, error: 'INTERNAL', description: 'РЎР±РѕР№ РЅР° СЃРµСЂРІРµСЂРµ' });
+      return sendJson(res, 500, { ok: false, error: 'INTERNAL', description: 'Сбой на сервере' });
     }
   };
 }
