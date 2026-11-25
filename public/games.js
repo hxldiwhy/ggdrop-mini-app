@@ -1,4 +1,4 @@
-/* Игры мини-приложения: рулетка, краш, кости, блэкджек, колесо, плинко. */
+/* Игры мини-приложения: рулетка, краш, блэкджек, колесо, плинко, монетка. */
 import {
   app, state, api, toast, fmt, money, mult, modal, onScreen, maxBetFor,
   readBet, setBet, rememberBet, lastBet,
@@ -16,7 +16,6 @@ const edge = (key, def) => Number(state.settings.houseEdge?.[key] ?? def);
 export function initGames() {
   initRoulette();
   initCrash();
-  initDice();
   initBlackjack();
   initWheel();
   initPlinko();
@@ -425,97 +424,7 @@ async function onCrashAction() {
   }
 }
 
-/* ══════════════════════════════ КОСТИ ══════════════════════════════ */
-const dice = { over: true, busy: false };
-
-function initDice() {
-  $('diceTarget').addEventListener('input', updateDicePreview);
-  $('diceOver').addEventListener('click', () => setDiceDir(true));
-  $('diceUnder').addEventListener('click', () => setDiceDir(false));
-  document.querySelectorAll('[data-dice-amt]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const v = btn.dataset.diceAmt;
-      const cur = readBet('diceAmount', 100);
-      if (v === 'max') setBet('diceAmount', Math.max(1, Math.min(state.user?.balance || 0, maxBetFor('dice'))));
-      else if (v === 'half') setBet('diceAmount', Math.max(1, Math.floor(cur / 2)));
-      else if (v === 'double') setBet('diceAmount', Math.min(state.user?.balance || 0, cur * 2));
-      else setBet('diceAmount', v);
-      rememberBet('dice', readBet('diceAmount'));
-    });
-  });
-  $('diceAmount').value = String(lastBet('dice', 100));
-  $('diceRoll').addEventListener('click', rollDiceNow);
-  updateDicePreview();
-}
-
-function setDiceDir(over) {
-  dice.over = over;
-  $('diceOver').classList.toggle('active', over);
-  $('diceUnder').classList.toggle('active', !over);
-  updateDicePreview();
-}
-
-function diceChance(target, over) {
-  return over ? (100 - target) / 100 : (target - 1) / 100;
-}
-
-function updateDicePreview() {
-  const t = Number($('diceTarget').value);
-  $('diceTargetVal').textContent = t;
-  const chance = diceChance(t, dice.over);
-  const e = edge('dice', 0.03);
-  const m = Math.max(1.01, Math.round(((1 - e) / chance) * 100) / 100);
-  $('diceChance').textContent = `${(chance * 100).toFixed(1)}%`;
-  $('diceMult').textContent = mult(m);
-  $('diceTargetLine').style.left = `${(t / 100) * 100}%`;
-  $('diceMarker').textContent = String(t);
-}
-
-async function rollDiceNow() {
-  if (dice.busy) return;
-  const amount = readBet('diceAmount');
-  rememberBet('dice', amount);
-  const target = Number($('diceTarget').value);
-  dice.busy = true;
-  $('diceRoll').disabled = true;
-  const diceStage = $('diceStage');
-  if (diceStage) {
-    diceStage.classList.remove('rolling');
-    void diceStage.offsetWidth;
-    diceStage.classList.add('rolling');
-    setTimeout(() => diceStage.classList.remove('rolling'), 950);
-  }
-  try {
-    const res = await api('/dice/bet', { method: 'POST', body: { amount, target, over: dice.over } });
-    const marker = $('diceMarker');
-    marker.style.transition = 'none';
-    marker.style.left = '2%';
-    void marker.offsetWidth;
-    marker.style.transition = 'left .55s cubic-bezier(.2,.8,.2,1)';
-    marker.style.left = `${(res.roll / 100) * 100}%`;
-    marker.textContent = String(res.roll);
-    marker.classList.remove('bounce');
-    void marker.offsetWidth;
-    marker.classList.add('bounce');
-    await sleep(600);
-    const profit = res.payout - res.totalBet;
-    if (res.win) {
-      toast(`Победа! ${res.roll} · +${money(profit)}`, 'ok');
-      app.haptic('success');
-    } else {
-      toast(`Проигрыш · ${res.roll}`, 'err');
-    }
-    $('diceResult').innerHTML = `<div class="panel panel--warm" style="margin:0">
-      <div class="small muted">Результат</div>
-      <div style="font-size:26px;font-weight:900" class="${profit >= 0 ? 'green' : 'red'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div>
-      <div class="small muted">Бросок ${res.roll} · ${dice.over ? 'больше' : 'меньше'} ${target} · x${res.multiplier || 0}</div>
-    </div>`;
-  } catch {
-  } finally {
-    dice.busy = false;
-    $('diceRoll').disabled = false;
-  }
-}
+/* Кости удалены по требованию владельца. */
 
 /* ══════════════════════════════ БЛЭКДЖЕК ══════════════════════════════ */
 const bj = { game: null, busy: false };
