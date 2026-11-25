@@ -24,7 +24,7 @@ async function withStrictServer(fn) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'casino-secure-'));
   const store = new Store(path.join(dir, 'db.json'));
   const engine = new Engine(store);
-  store.settings = { ownerId: 1001, maxBalance: 150000, storageFee: { enabled: false, threshold: 100000, percentPerDay: 1, intervalMs: 1000 } };
+  store.settings = { ownerId: 1001, maxBalance: 0, storageFee: { enabled: false, threshold: 100000, percentPerDay: 0, intervalMs: 1000 } };
   const owner = store.ensureUser({ id: 1001, first_name: 'Host' });
   const user = store.ensureUser({ id: 2002, first_name: 'Player' });
   store.credit(user, 1000);
@@ -115,7 +115,7 @@ test('строгий вход: Wiftgram без id клиента пускает 
   await withStrictServer(async ({ call, user }) => {
     const r = await call('/api/session', {
       method: 'POST',
-      body: { t: signToken(user.id) },
+      body: { t: signToken(user.id), device: 'device-1' },
     });
     assert.equal(r.status, 200);
 
@@ -126,6 +126,21 @@ test('строгий вход: Wiftgram без id клиента пускает 
     const noToken = await call('/api/session', { method: 'POST', body: {} });
     assert.equal(noToken.status, 401);
     assert.equal(noToken.data.error, 'ACCOUNT_CHECK');
+  });
+});
+
+test('строгий вход: скопированную кнопку нельзя открыть на другом устройстве', async () => {
+  await withStrictServer(async ({ call, user }) => {
+    const login = signToken(user.id);
+    const first = await call('/api/session', { method: 'POST', body: { t: login, device: 'device-1' } });
+    assert.equal(first.status, 200);
+
+    const again = await call('/api/session', { method: 'POST', body: { t: login, device: 'device-1' } });
+    assert.equal(again.status, 200);
+
+    const copied = await call('/api/session', { method: 'POST', body: { t: login, device: 'device-2' } });
+    assert.equal(copied.status, 401);
+    assert.equal(copied.data.error, 'LINK_USED');
   });
 });
 
@@ -140,14 +155,14 @@ test('строгий вход: чужой webApp id не открывает чу
   });
 });
 
-test('потолок баланса: излишек уходит в банк и виден в профиле', async () => {
+test('потолок баланса снят: деньги остаются на балансе', async () => {
   await withStrictServer(async ({ call, store, user }) => {
     store.credit(user, 200000);
     const r = await call('/api/me', { token: signToken(user.id), initData: makeInitData({ id: user.id }) });
     assert.equal(r.status, 200);
-    assert.equal(r.data.user.balance, 150000);
-    assert.equal(r.data.user.vault, 51000);
-    assert.equal(r.data.settings.maxBalance, 150000);
+    assert.equal(r.data.user.balance, 201000);
+    assert.equal(r.data.user.vault, 0);
+    assert.equal(r.data.settings.maxBalance, 0);
   });
 });
 
@@ -156,11 +171,11 @@ test('комиссия за хранение списывается один р�
     store.settings = { storageFee: { enabled: true, threshold: 100000, percentPerDay: 1, intervalMs: 1000 } };
     store.credit(user, 200000);
     const fee = engine.applyStorageFee(user.id);
-    assert.equal(fee, 500);
+    assert.equal(fee, 1010);
     assert.equal(engine.applyStorageFee(user.id), 0);
     const last = store.recent(user.id, 1)[0];
     assert.equal(last.game, 'fee');
-    assert.equal(last.profit, -500);
+    assert.equal(last.profit, -1010);
   });
 });
 
@@ -169,6 +184,8 @@ test('вывод: заявка резервирует сумму, отклоне
     store.credit(user, 50000);
     const wd = engine.createWithdrawal(user.id, { amount: 10000, contact: '@crypt' });
     assert.equal(wd.status, 'pending');
+    assert.equal(wd.fee, 1300);
+    assert.equal(wd.net, 8700);
     assert.equal(user.balance, 41000);
     assert.throws(() => engine.createWithdrawal(user.id, { amount: 999999 }), /Максимальный вывод/);
 
@@ -180,5 +197,6 @@ test('вывод: заявка резервирует сумму, отклоне
     engine.decideWithdrawal(owner.id, wd2.id, true);
     assert.equal(user.balance, 41000);
     assert.equal(store.data.withdrawals[1].status, 'approved');
+    assert.equal(store.data.meta.totalFees, 1300);
   });
 });
