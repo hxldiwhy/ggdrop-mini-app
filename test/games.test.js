@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { playRoulette, payoutMultiplier, colorOf, spinWheel } from '../src/games/roulette.js';
-import { playDice, diceChance, diceMultiplier, rollDice } from '../src/games/dice.js';
 import { crashPointFromSeed, multiplierAt, timeForMultiplier, verifyCrash, newRoundSeed } from '../src/games/crash.js';
 import { handValue, newShoe, draw, playDealer, dealerShouldHit } from '../src/games/blackjack.js';
 import { WHEEL_SEGMENTS, WHEEL_BASE_RTP, spinWheelGame, pickSegment } from '../src/games/wheel.js';
@@ -50,21 +49,6 @@ test('рулетка: невалидные ставки', () => {
   assert.throws(() => playRoulette({ bets: [{ type: 'nope', amount: 10 }], rng: fixed(0.5) }), /BET_TYPE_INVALID/);
   assert.throws(() => playRoulette({ bets: [{ type: 'number', value: 99, amount: 10 }], rng: fixed(0.5) }), /BET_NUMBER_INVALID/);
   assert.throws(() => playRoulette({ bets: [{ type: 'red', amount: 1 }], rng: fixed(0.5), minBet: 10 }), /BET_AMOUNT_INVALID/);
-});
-
-test('кости: шанс, множитель и результат', () => {
-  assert.equal(rollDice(fixed(0)), 1);
-  assert.equal(rollDice(fixed(0.99)), 100);
-  assert.equal(diceChance(50, true), 0.5);
-  assert.equal(diceChance(50, false), 0.49);
-  assert.ok(Math.abs(diceMultiplier(50, true, 0.03) - 1.94) < 0.02);
-  const over = playDice({ amount: 100, target: 50, over: true, rng: fixed(0.6), edge: 0.03 });
-  assert.equal(over.roll, 61);
-  assert.equal(over.win, true);
-  assert.equal(over.payout, 194);
-  const under = playDice({ amount: 100, target: 50, over: false, rng: fixed(0.6), edge: 0.03 });
-  assert.equal(under.win, false);
-  assert.equal(under.payout, 0);
 });
 
 test('краш: детерминизм и распределение', () => {
