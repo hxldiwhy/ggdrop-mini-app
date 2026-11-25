@@ -23,25 +23,44 @@ test('выплата не ограничивается кассой: стары�
     enabled: true, amount: 1000, maxBetPercent: 2, maxPayoutPercent: 5,
     dailyProfitPercent: 2, dailyHouseCapPercent: 20, exposureLimit: 20,
   };
-  const r = engine.settle(user, 'dice', 100, 10000, 'тест');
+  const r = engine.settle(user, 'wheel', 100, 10000, 'тест');
   assert.equal(r.payout, 10000);
   assert.equal(r.profit, 9900);
   assert.equal(r.entry.detail, 'тест');
-  assert.equal(engine.assertBet(user, 20, 'dice'), 20);
+  assert.equal(engine.assertBet(user, 20, 'wheel'), 20);
 });
 
 test('лимит ставки по игре остаётся, лимит кассы больше не проверяется', () => {
   const { store, engine, user } = makeEngine();
-  store.settings.limits = { ...store.settings.limits, dice: 100 };
-  assert.throws(() => engine.assertBet(user, 101, 'dice'), /лимита/i);
-  assert.equal(engine.assertBet(user, 100, 'dice'), 100);
+  store.settings.limits = { ...store.settings.limits, wheel: 100 };
+  assert.throws(() => engine.assertBet(user, 101, 'wheel'), /лимита/i);
+  assert.equal(engine.assertBet(user, 100, 'wheel'), 100);
 });
 
-test('потолок баланса: излишек уходит в видимый банк', () => {
+test('после перезапуска хозяин не забанен и старый лимит 150000 не применяется', () => {
+  const { dir, store } = makeEngine();
+  store.data.settings.ownerId = 1;
+  store.data.settings.maxWithdraw = 150000;
+  store.data.users[1].banned = true;
+  store.save();
+  const reloaded = new Store(path.join(dir, 'db.json'));
+  assert.equal(reloaded.data.users[1].banned, false);
+  assert.equal(reloaded.settings.maxWithdraw, 1000000);
+});
+
+test('база сохраняется сразу, без ожидания таймера', () => {
+  const { dir, store, user } = makeEngine();
+  store.credit(user, 123);
+  const raw = JSON.parse(fs.readFileSync(path.join(dir, 'db.json'), 'utf8'));
+  assert.equal(raw.users[user.id].balance, 10123);
+});
+
+test('потолок баланса снят: весь выигрыш остаётся доступным', () => {
   const { store, user } = makeEngine();
   store.credit(user, 200000);
-  assert.equal(user.balance, store.balanceCap());
-  assert.equal(user.vault, 200000 + 10000 - store.balanceCap());
+  assert.equal(user.balance, 210000);
+  assert.equal(user.vault, 0);
+  assert.equal(store.balanceCap(), Infinity);
 });
 
 test('банкролл не передаётся игроку и не возвращается в статистике хозяина', () => {
