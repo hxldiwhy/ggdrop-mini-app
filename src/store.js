@@ -6,9 +6,9 @@ export const DEFAULT_SETTINGS = {
   ownerId: 0,
   publicUrl: '',
   botUsername: '',
-  /** РљР°СЃСЃРёСЂ вЂ” РєРѕРјСѓ РїРёСЃР°С‚СЊ РґР»СЏ РїРѕРїРѕР»РЅРµРЅРёСЏ Р·РІС‘Р·Рґ */
+  /** Кассир — кому писать для пополнения звёзд */
   cashierUsername: 'crypt',
-  currency: 'в­ђ',
+  currency: '⭐',
   welcomeBonus: 5000,
   dailyBonus: 1000,
   refBonus: 250,
@@ -17,24 +17,24 @@ export const DEFAULT_SETTINGS = {
   minDeposit: 100,
   maxDeposit: 1000000,
   maxPendingDeposits: 3,
-  /** Р—Р°СЏРІРєРё РЅР° РІС‹РІРѕРґ Р·РІС‘Р·Рґ */
+  /** Заявки на вывод звёзд */
   minWithdraw: 1000,
   maxWithdraw: 150000,
   maintenance: false,
-  /** Р”РѕР»СЏ РєР°Р·РёРЅРѕ РІ РєР°Р¶РґРѕР№ РёРіСЂРµ (0.03 = 3%) */
+  /** Доля казино в каждой игре (0.03 = 3%) */
   houseEdge: { roulette: 0.027, dice: 0.03, blackjack: 0.012, crash: 0.03, wheel: 0.04, plinko: 0.03, coinflip: 0.03 },
-  /** Р›РёРјРёС‚С‹ РЅР° РѕРґРЅСѓ СЃС‚Р°РІРєСѓ РїРѕ РёРіСЂРµ */
+  /** Лимиты на одну ставку по игре */
   limits: { roulette: 50000, dice: 25000, blackjack: 25000, crash: 25000, wheel: 25000, plinko: 25000, coinflip: 25000, auction: 25000 },
   dailyCooldownMs: 24 * 60 * 60 * 1000,
-  /** РљСЂР°С€: РІСЂРµРјСЏ РїСЂРёС‘РјР° СЃС‚Р°РІРѕРє Рё РїР°СѓР·С‹ РјРµР¶РґСѓ СЂР°СѓРЅРґР°РјРё */
+  /** Краш: время приёма ставок и паузы между раундами */
   crash: { bettingMs: 8000, cooldownMs: 5000 },
-  /** РћРіСЂР°РЅРёС‡РµРЅРёСЏ РґР»СЏ РЅРѕРІС‹С… Р°РєРєР°СѓРЅС‚РѕРІ */
+  /** Ограничения для новых аккаунтов */
   newUserMaxBet: 5000,
-  /** РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЃС‚Р°РІРєР° РґР»СЏ РІС‹РІРѕРґР° РІ С‚РѕРї */
+  /** Минимальная ставка для вывода в топ */
   topBy: 'totalWin',
-  /** РџРѕС‚РѕР»РѕРє Р±Р°Р»Р°РЅСЃР°. Р’СЃС‘ СЃРІРµСЂС…Сѓ СѓС…РѕРґРёС‚ РІ РІРёРґРёРјС‹Р№ В«Р±Р°РЅРєВ» РёРіСЂРѕРєР°. */
+  /** Потолок баланса. Всё сверху уходит в видимый «банк» игрока. */
   maxBalance: 150000,
-  /** РЇРІРЅР°СЏ РєРѕРјРёСЃСЃРёСЏ Р·Р° С…СЂР°РЅРµРЅРёРµ СЃРІРµСЂС… РїРѕСЂРѕРіР° вЂ” РёРіСЂРѕРє РІРёРґРёС‚ РµС‘ РІ РїСЂРѕС„РёР»Рµ Рё РёСЃС‚РѕСЂРёРё. */
+  /** Явная комиссия за хранение сверх порога — игрок видит её в профиле и истории. */
   storageFee: { enabled: true, threshold: 100000, percentPerDay: 0.5, intervalMs: 24 * 60 * 60 * 1000 },
   updatedAt: 0,
 };
@@ -49,7 +49,7 @@ const DEFAULT_DB = () => ({
   history: [],
   deposits: [],
   withdrawals: [],
-  /** РћРґРёРЅ Р°РєС‚РёРІРЅС‹Р№ Р»РѕС‚ РїР»СЋСЃ Р·Р°РІРµСЂС€С‘РЅРЅС‹Рµ Р°СѓРєС†РёРѕРЅС‹. */
+  /** Один активный лот плюс завершённые аукционы. */
   auctions: [],
   meta: { totalBets: 0, totalWagered: 0, totalPaid: 0, totalFees: 0, totalBurned: 0, rounds: {}, usedLoginNonces: [] },
 });
@@ -77,12 +77,12 @@ export class Store {
         this.data.settings.limits = { ...DEFAULT_SETTINGS.limits, ...((raw.settings || {}).limits || {}) };
         this.data.settings.crash = { ...DEFAULT_SETTINGS.crash, ...((raw.settings || {}).crash || {}) };
         this.data.settings.storageFee = { ...DEFAULT_SETTINGS.storageFee, ...((raw.settings || {}).storageFee || {}) };
-        // РЎС‚Р°СЂС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё Р·Р°С‰РёС‚С‹ РєР°СЃСЃС‹ Р±РѕР»СЊС€Рµ РЅРµ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ вЂ” С‡РёСЃС‚РёРј РёС… РёР· Р±Р°Р·С‹.
+        // Старые настройки защиты кассы больше не используются — чистим их из базы.
         delete this.data.settings.bankroll;
         delete this.data.meta.dailyPaid;
         delete this.data.meta.dailyPaidDate;
         delete this.data.meta.jackpot;
-        // РЈРґР°Р»С‘РЅРЅС‹Рµ РёРіСЂС‹ РЅРµ РґРѕР»Р¶РЅС‹ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ РІ РЅР°СЃС‚СЂРѕР№РєР°С…, СЃС‡С‘С‚С‡РёРєР°С… Рё РёСЃС‚РѕСЂРёРё.
+        // Удалённые игры не должны оставаться в настройках, счётчиках и истории.
         const removedGames = new Set(['mines', 'case', 'slots']);
         for (const key of removedGames) {
           delete this.data.settings.houseEdge[key];
@@ -110,14 +110,14 @@ export class Store {
     } catch (err) {
       const backup = `${this.file}.broken-${Date.now()}`;
       try { fs.renameSync(this.file, backup); } catch {}
-      console.error('[store] РќРµ СѓРґР°Р»РѕСЃСЊ РїСЂРѕС‡РёС‚Р°С‚СЊ Р±Р°Р·Сѓ, СЃРѕР·РґР°СЋ РЅРѕРІСѓСЋ. Р‘СЌРєР°Рї:', backup, err.message);
+      console.error('[store] Не удалось прочитать базу, создаю новую. Бэкап:', backup, err.message);
       this.data = DEFAULT_DB();
       this.flushNow();
     }
-    // РҐРѕР·СЏРёРЅ РёР· .env РёРјРµРµС‚ РїСЂРёРѕСЂРёС‚РµС‚ С‚РѕР»СЊРєРѕ РїСЂРё РїРµСЂРІРѕРј Р·Р°РїСѓСЃРєРµ
+    // Хозяин из .env имеет приоритет только при первом запуске
     if (CONFIG.ownerId && !this.data.settings.ownerId) {
       this.data.settings.ownerId = CONFIG.ownerId;
-      const u = this.ensureUser({ id: CONFIG.ownerId, first_name: 'РҐРѕР·СЏРёРЅ' });
+      const u = this.ensureUser({ id: CONFIG.ownerId, first_name: 'Хозяин' });
       if (u) u.isOwner = true;
       this.save();
     }
@@ -153,7 +153,7 @@ export class Store {
         lastName: from.last_name || '',
         photo: '',
         balance: 0,
-        /** РР·Р»РёС€РµРє СЃРІРµСЂС… maxBalance вЂ” РІРёРґРµРЅ РёРіСЂРѕРєСѓ Рё РјРѕР¶РµС‚ Р±С‹С‚СЊ РІС‹РґР°РЅ С…РѕР·СЏРёРЅРѕРј. */
+        /** Излишек сверх maxBalance — виден игроку и может быть выдан хозяином. */
         vault: 0,
         lastFeeAt: 0,
         feePaid: 0,
@@ -185,7 +185,7 @@ export class Store {
   user(id) { return this.data.users[Number(id)] || null; }
   users() { return Object.values(this.data.users); }
 
-  /** Р–С‘СЃС‚РєРёР№ РїРѕС‚РѕР»РѕРє Р±Р°Р»Р°РЅСЃР°: Р»РёС€РЅРµРµ РЅРµ РїСЂРѕРїР°РґР°РµС‚, Р° СѓС…РѕРґРёС‚ РІ РІРёРґРёРјС‹Р№ Р±Р°РЅРє РёРіСЂРѕРєР°. */
+  /** Жёсткий потолок баланса: лишнее не пропадает, а уходит в видимый банк игрока. */
   balanceCap() {
     return Math.max(1000, Math.round(Number(this.settings.maxBalance) || 150000));
   }
@@ -213,7 +213,7 @@ export class Store {
     return u.balance;
   }
 
-  /** РџРµСЂРµРІРµСЃС‚Рё С‡Р°СЃС‚СЊ РІРёРґРёРјРѕРіРѕ Р±Р°РЅРєР° РЅР° Р±Р°Р»Р°РЅСЃ (РЅРµ Р±РѕР»СЊС€Рµ СЃРІРѕР±РѕРґРЅРѕРіРѕ РјРµСЃС‚Р° РґРѕ РїРѕС‚РѕР»РєР°). */
+  /** Перевести часть видимого банка на баланс (не больше свободного места до потолка). */
   fromVault(user, amount = Infinity) {
     const u = typeof user === 'object' ? user : this.user(user);
     if (!u) return 0;
@@ -309,7 +309,7 @@ export class Store {
     };
   }
 
-  /** РћРґРЅРѕСЂР°Р·РѕРІС‹Р№ РІС…РѕРґ РїРѕ РєРЅРѕРїРєРµ: СЃРєРѕРїРёСЂРѕРІР°РЅРЅСѓСЋ СЃСЃС‹Р»РєСѓ РЅРµР»СЊР·СЏ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РїРѕРІС‚РѕСЂРЅРѕ. */
+  /** Одноразовый вход по кнопке: скопированную ссылку нельзя использовать повторно. */
   consumeLoginNonce(nonce) {
     if (!nonce) return true;
     const key = String(nonce).slice(0, 80);
@@ -338,7 +338,7 @@ export class Store {
       fs.renameSync(tmp, this.file);
       this._dirty = false;
     } catch (err) {
-      console.error('[store] РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ:', err.message);
+      console.error('[store] Ошибка сохранения:', err.message);
     }
   }
 
