@@ -43,6 +43,35 @@ test('аукцион: перебитая ставка сгорает и не в�
   assert.match(store.recent(2002, 5)[0].detail, /сгорела/);
 });
 
+test('аукцион: повышение своей ставки списывает только разницу и не сжигает её', () => {
+  const { store, engine, alice } = setup();
+  createLot(engine);
+  const first = engine.auctionBid(2002, { amount: 100 });
+  assert.equal(alice.balance, 900);
+  assert.equal(first.lot.reserved, 100);
+
+  const raised = engine.auctionBid(2002, { amount: 150 });
+  assert.equal(alice.balance, 850, 'со счёта списаны только добавленные 50');
+  assert.equal(raised.lot.currentBid, 150);
+  assert.equal(raised.lot.reserved, 150);
+  assert.equal(store.data.meta.totalBurned, 0, 'своя ставка не сгорела');
+  assert.equal(raised.lot.bids.filter((b) => b.burned).length, 0);
+});
+
+test('аукцион: пока игрок лидирует деньги лежат в резерве и возвращаются при отмене', () => {
+  const { store, engine, alice } = setup();
+  createLot(engine);
+  engine.auctionBid(2002, { amount: 100 });
+
+  assert.equal(engine.auctionPublic(2002).reserved, 100);
+  assert.equal(store.data.meta.totalBurned, 0, 'ставка ещё не проиграна');
+
+  const done = engine.auctionCancel(1001);
+  assert.equal(done.lot.status, 'canceled');
+  assert.equal(alice.balance, 1000, 'резерв вернулся на баланс');
+  assert.equal(store.data.meta.totalBurned, 0);
+});
+
 test('аукцион: победитель получает подарок, ставка уходит организатору', () => {
   const { store, engine, owner, bob } = setup();
   createLot(engine);
