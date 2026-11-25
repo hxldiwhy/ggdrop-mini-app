@@ -181,7 +181,7 @@ async function main() {
   log.info(`Публичный адрес: ${publicUrl}`);
   log.info(`Мини-приложение: ${publicUrl !== 'не задан' ? publicUrl + '/app' : `http://127.0.0.1:${CONFIG.httpPort}/app`}`);
   log.info(`Валюта: ${store.settings.currency} · ставки ${store.settings.minBet}–${store.settings.maxBet}`);
-  log.info(`Баланс: потолок ${store.balanceCap()} · комиссия ${store.settings.storageFee?.percentPerDay || 0}%/сутки сверх ${store.settings.storageFee?.threshold || 0}`);
+  log.info('Баланс: без потолка · комиссия за вывод 13%');
   log.info(`Проверка аккаунта: ${CONFIG.strictAuth ? 'включена (initData)' : 'совместимый режим (без initData)'}`);
   log.info('─'.repeat(64));
 
