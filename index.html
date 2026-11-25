@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050912" />
+  <title>GGDROP — вход в казино</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #050912; color: #EDF3FF; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    body { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+    .box { width: min(100%, 420px); padding: 24px; border-radius: 16px; background: #121F35; border: 1px solid rgba(255, 255, 255, .08); text-align: center; }
+    .mark { font-size: 36px; line-height: 1; color: #FFC76A; }
+    h1 { margin: 14px 0 8px; font-size: 20px; line-height: 26px; color: #EDF3FF; }
+    p { margin: 0; color: #8BA0BF; font-size: 13px; line-height: 20px; }
+    .err { color: #FF5C7A; }
+  </style>
+</head>
+<body>
+  <main class="box">
+    <div class="mark" aria-hidden="true">🎰</div>
+    <h1>Открываем GGDROP</h1>
+    <p id="status">Переходим в мини-приложение…</p>
+  </main>
+  <script>
+    (function () {
+      const status = document.getElementById('status');
+      const q = new URLSearchParams(location.search);
+
+      function validBase(value) {
+        try {
+          const u = new URL(String(value || '').trim());
+          return u.protocol === 'https:' && /(^|\.)trycloudflare\.com$/i.test(u.hostname);
+        } catch (_) {
+          return false;
+        }
+      }
+
+      async function currentBase() {
+        const fromLink = q.get('u');
+        if (validBase(fromLink)) return String(fromLink).replace(/\/+$/, '');
+        try {
+          const res = await fetch('./backend-url.txt', { cache: 'no-store' });
+          const text = (await res.text()).trim();
+          if (validBase(text)) return text.replace(/\/+$/, '');
+        } catch (_) {}
+        return '';
+      }
+
+      async function go() {
+        const base = await currentBase();
+        if (!base) {
+          status.className = 'err';
+          status.textContent = 'Не удалось получить адрес казино. Открой мини-приложение кнопкой в боте — она обновит ссылку.';
+          return;
+        }
+        const dest = new URL('/app', base);
+        const token = q.get('t');
+        if (token) dest.searchParams.set('t', token);
+        for (const [key, value] of q.entries()) {
+          if (key !== 'u' && key !== 't') dest.searchParams.set(key, value);
+        }
+        if (location.hash) dest.hash = location.hash;
+        status.textContent = 'Готово. Если переход не начался, открой казино кнопкой в боте.';
+        location.replace(dest.toString());
+      }
+
+      go();
+    })();
+  </script>
+</body>
+</html>
